@@ -1,4 +1,4 @@
-import { FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { FlatList, Image, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { BUSINESS } from '../config';
 import { colors, radius } from '../theme';
 import { Listing, typeIcon } from '../data/listings';
@@ -40,8 +40,13 @@ export function HomeScreen({ openListing, fav, goSearch }: ScreenProps) {
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={colors.accent} />}
     >
       <View style={styles.hero}>
-        <T style={styles.brandSmall}>{BUSINESS.nameAr}</T>
-        <T style={styles.brand}>{BUSINESS.subtitleAr}</T>
+        <View style={styles.brandRow}>
+          <Image source={require('../../assets/logo-mark.png')} style={styles.logo} accessibilityLabel="شعار سمات السكن" />
+          <View style={{ flex: 1 }}>
+            <T style={styles.brandSmall}>{BUSINESS.nameAr}</T>
+            <T style={styles.brand}>{BUSINESS.subtitleAr}</T>
+          </View>
+        </View>
         <T style={styles.tagline}>{BUSINESS.taglineAr}</T>
         <View style={styles.searchBox}>
           <Text style={{ fontSize: 16 }}>🔍</Text>
@@ -91,6 +96,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary, paddingHorizontal: 16, paddingTop: 18, paddingBottom: 22,
     borderBottomLeftRadius: radius.lg, borderBottomRightRadius: radius.lg,
   },
+  brandRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  logo: { width: 62, height: 62 },
   brandSmall: { color: '#DCE3EA', fontSize: 15 },
   brand: { color: '#fff', fontSize: 28, fontWeight: '800', marginTop: 2 },
   tagline: { color: '#C9D3DD', fontSize: 14, marginTop: 8, marginBottom: 16, lineHeight: 22 },
