@@ -36,6 +36,8 @@ export function formatPrice(l: Listing): string {
   return l.purpose === 'wanted' ? 'طلب شراء' : 'السعر عند الطلب';
 }
 
+export const formatOldPrice = (l: Listing) => (l.isOffer && l.oldPrice ? `${fmt(l.oldPrice)} ريال` : '');
+
 export const formatArea = (a: number) => `${fmt(a)} م²`;
 
 export function place(l: Listing): string {

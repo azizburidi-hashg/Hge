@@ -64,6 +64,7 @@ export function toAppListings(raw: SiteListing[], ratios: Record<string, number>
       const title = String(p.titleAr).trim();
       return {
         id: String(p.id),
+        source: 'site' as const,
         order: i,
         title,
         titleEn: String(p.titleEn ?? '').trim(),

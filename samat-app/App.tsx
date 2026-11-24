@@ -11,6 +11,7 @@ import { SearchScreen } from './src/screens/SearchScreen';
 import { DetailScreen } from './src/screens/DetailScreen';
 import { FavoritesScreen } from './src/screens/FavoritesScreen';
 import { ContactScreen } from './src/screens/ContactScreen';
+import { OwnerScreen } from './src/screens/OwnerScreen';
 import type { SearchParams } from './src/screens/types';
 
 type Tab = 'home' | 'search' | 'favorites' | 'contact';
@@ -38,18 +39,20 @@ function Main() {
   const { listings } = useListings();
   const [tab, setTab] = useState<Tab>('home');
   const [openId, setOpenId] = useState<string | null>(null);
+  const [ownerOpen, setOwnerOpen] = useState(false);
   const [search, setSearch] = useState<{ params: SearchParams; key: number }>({ params: {}, key: 0 });
   const fav = useFavorites();
 
   // Android back button closes a listing before leaving the app.
   useEffect(() => {
     const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (ownerOpen) { setOwnerOpen(false); return true; }
       if (openId) { setOpenId(null); return true; }
       if (tab !== 'home') { setTab('home'); return true; }
       return false;
     });
     return () => sub.remove();
-  }, [openId, tab]);
+  }, [openId, tab, ownerOpen]);
 
   const goSearch = (params: SearchParams) => {
     setSearch((s) => ({ params, key: s.key + 1 }));
@@ -61,13 +64,15 @@ function Main() {
 
   return (
     <SafeAreaProvider>
-      <StatusBar style={listing ? 'dark' : tab === 'home' ? 'light' : 'dark'} />
+      <StatusBar style={!listing && !ownerOpen && tab === 'home' ? 'light' : 'dark'} />
       <SafeAreaView
         edges={['top']}
-        style={[styles.root, { backgroundColor: !listing && tab === 'home' ? colors.primary : colors.bg }]}
+        style={[styles.root, { backgroundColor: !listing && !ownerOpen && tab === 'home' ? colors.primary : colors.bg }]}
       >
         <View style={styles.content}>
-          {listing ? (
+          {ownerOpen ? (
+            <OwnerScreen onClose={() => setOwnerOpen(false)} />
+          ) : listing ? (
             <DetailScreen listing={listing} fav={fav} onBack={() => setOpenId(null)} />
           ) : (
             <>
@@ -79,11 +84,11 @@ function Main() {
               {tab === 'home' && <HomeScreen {...props} />}
               {tab === 'search' && <SearchScreen key={search.key} initial={search.params} {...props} />}
               {tab === 'favorites' && <FavoritesScreen {...props} />}
-              {tab === 'contact' && <ContactScreen />}
+              {tab === 'contact' && <ContactScreen onOwner={() => setOwnerOpen(true)} />}
             </>
           )}
         </View>
-        {!listing && (
+        {!listing && !ownerOpen && (
           <SafeAreaView edges={['bottom']} style={styles.tabBar}>
             {TABS.map((t) => {
               const active = t.key === tab;

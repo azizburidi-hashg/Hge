@@ -10,6 +10,7 @@ import type { ScreenProps } from './types';
 
 export function HomeScreen({ openListing, fav, goSearch }: ScreenProps) {
   const { listings: LISTINGS, types: TYPES, refreshing, refresh } = useListings();
+  const offers = LISTINGS.filter((l) => l.isOffer);
   const featured = LISTINGS.filter((l) => l.purpose !== 'wanted').slice(0, 8);
   const lands = LISTINGS.filter((l) => l.type === 'أرض' && l.purpose !== 'wanted');
   const count = (t: string) => LISTINGS.filter((l) => l.type === t).length;
@@ -63,6 +64,13 @@ export function HomeScreen({ openListing, fav, goSearch }: ScreenProps) {
           </Pressable>
         ))}
       </ScrollView>
+
+      {offers.length ? (
+        <>
+          <SectionTitle>{`🏷️ عروض خاصة (${offers.length})`}</SectionTitle>
+          {row(offers)}
+        </>
+      ) : null}
 
       <SectionTitle>عقارات مميزة</SectionTitle>
       {row(featured)}

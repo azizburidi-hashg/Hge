@@ -1,6 +1,6 @@
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { colors, radius } from '../theme';
-import { formatArea, formatPrice, Listing, place, PURPOSE_LABEL } from '../data/listings';
+import { formatArea, formatOldPrice, formatPrice, Listing, place, PURPOSE_LABEL } from '../data/listings';
 import { Button, Photo, T } from '../components/ui';
 import { call, listingMessage, open, shareListing, whatsapp } from '../contact';
 import type { ScreenProps } from './types';
@@ -16,6 +16,8 @@ export function DetailScreen({ listing: l, fav, onBack }: Pick<ScreenProps, 'fav
     ['دورات المياه', l.baths ? String(l.baths) : null],
   ];
   const isFav = fav.has(l.id);
+  const { width } = useWindowDimensions();
+  const extra = (l.gallery ?? []).slice(1);
 
   return (
     <View style={{ flex: 1 }}>
@@ -35,9 +37,25 @@ export function DetailScreen({ listing: l, fav, onBack }: Pick<ScreenProps, 'fav
           </Pressable>
         </View>
 
+        {extra.length ? (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.thumbs}>
+            {extra.map((src, i) => (
+              <Image key={i} source={src} style={{ width: width * 0.6, height: width * 0.45, borderRadius: radius.sm }} resizeMode="cover" />
+            ))}
+          </ScrollView>
+        ) : null}
+
         <View style={styles.body}>
+          {l.isOffer ? (
+            <View style={styles.offer}>
+              <T style={styles.offerText}>
+                {`🏷️ ${l.offerText || 'عرض خاص'}${l.offerEnds ? ` · حتى ${l.offerEnds}` : ''}`}
+              </T>
+            </View>
+          ) : null}
           <T style={styles.title}>{l.title}</T>
           <T style={styles.price}>{formatPrice(l)}</T>
+          {formatOldPrice(l) ? <T style={styles.old}>بدلاً من {formatOldPrice(l)}</T> : null}
           {place(l) ? <T style={styles.meta}>📍 {place(l)}</T> : null}
 
           <View style={styles.grid}>
@@ -69,7 +87,7 @@ export function DetailScreen({ listing: l, fav, onBack }: Pick<ScreenProps, 'fav
 
           <View style={styles.row}>
             <Button label="مشاركة" outline onPress={() => shareListing(l)} style={{ flex: 1 }} />
-            <Button label="عرض في الموقع" outline onPress={() => open(l.url)} style={{ flex: 1 }} />
+            {l.url ? <Button label="عرض في الموقع" outline onPress={() => open(l.url)} style={{ flex: 1 }} /> : null}
           </View>
         </View>
       </ScrollView>
@@ -91,6 +109,10 @@ const styles = StyleSheet.create({
   title: { fontSize: 21, fontWeight: '800', color: colors.primary, lineHeight: 30 },
   price: { fontSize: 20, fontWeight: '800', color: colors.accent, marginTop: 6 },
   meta: { color: colors.muted, marginTop: 6 },
+  old: { color: colors.muted, textDecorationLine: 'line-through', marginTop: 2 },
+  thumbs: { gap: 8, paddingHorizontal: 16, paddingTop: 12 },
+  offer: { alignSelf: 'flex-start', backgroundColor: colors.accent, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 5, marginBottom: 10 },
+  offerText: { color: colors.primary, fontWeight: '800', fontSize: 13 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', marginTop: 16, marginHorizontal: -5 },
   spec: { width: '50%', padding: 5 },
   specBox: {

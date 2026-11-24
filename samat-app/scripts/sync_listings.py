@@ -78,6 +78,7 @@ def main():
         price_n = number(p.get("price"))
         items.append({
             "id": p["id"],
+            "source": "site",
             "order": i,
             "title": p.get("titleAr", "").strip(),
             "titleEn": p.get("titleEn", "").strip(),

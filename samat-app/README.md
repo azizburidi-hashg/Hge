@@ -24,6 +24,26 @@ while offline, so run it now and then before releasing a new version, but it is 
 
 Contact details, the FAL license and CR number are in `src/config.ts`.
 
+## Owner section: post your own listings and offers
+In the app: **تواصل** tab > **دخول المالك** (small link at the bottom). After signing in you can:
+- add a listing or a **special offer** (عرض خاص) with photos from your phone, price, old price (shown crossed out),
+  offer text and end date
+- edit, hide/show, pin to the top, or delete anything you posted
+
+What you post appears first in everyone's app on their next refresh (opening the app, or pulling down). No app update.
+Website listings keep appearing too, after yours. Only accounts you list as admins can post; everyone else can only view.
+
+### One-time setup (about 10 minutes, free)
+1. Create a free account at supabase.com and a **New project** (choose the region closest to Saudi Arabia).
+2. **SQL Editor** > New query > paste all of `supabase/schema.sql` > **Run**.
+3. **Authentication** > Users > **Add user**: your email and a strong password. This is your owner login.
+4. **SQL Editor** again, run (with your email):
+   `insert into admins (user_id) select id from auth.users where email = 'YOUR@EMAIL';`
+5. **Project Settings** > API: copy the **Project URL** and the **anon public** key into `src/config.ts`
+   (`SUPABASE.url` and `SUPABASE.anonKey`). Both are safe to put in the app. Never put the `service_role` key in the app.
+
+To give a staff member access, add a user for them (step 3) and run step 4 with their email.
+
 ## Before publishing
 - `assets/icon.png` is a simple "SA" placeholder icon. Replace it with your logo (1024x1024 PNG).
 

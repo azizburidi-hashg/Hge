@@ -35,6 +35,9 @@
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#00264D"
-    }
+    },
+    "plugins": [
+      "expo-secure-store"
+    ]
   }
 }

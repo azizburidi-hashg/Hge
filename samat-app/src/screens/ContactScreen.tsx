@@ -9,7 +9,7 @@ import { call, email, open, whatsapp } from '../contact';
 type Mode = 'want' | 'offer';
 
 // The buyer's request (or a property someone wants to list) is sent to the office on WhatsApp. No server needed.
-export function ContactScreen() {
+export function ContactScreen({ onOwner }: { onOwner: () => void }) {
   const { types: TYPES } = useListings();
   const [mode, setMode] = useState<Mode>('want');
   const [name, setName] = useState('');
@@ -74,6 +74,9 @@ export function ContactScreen() {
         <Field label="ملاحظات" value={notes} onChange={setNotes} multiline />
         <Button label="إرسال عبر واتساب" color={colors.whatsapp} onPress={send} style={{ marginTop: 14 }} />
       </View>
+      <Pressable onPress={onOwner} accessibilityRole="button" style={{ alignSelf: 'center', padding: 10 }}>
+        <T style={{ color: colors.muted, fontSize: 13, textAlign: 'center' }}>دخول المالك</T>
+      </Pressable>
     </ScrollView>
   );
 }
