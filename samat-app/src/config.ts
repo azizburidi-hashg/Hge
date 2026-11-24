@@ -1,13 +1,21 @@
-// Business details shown in the app. Replace the placeholders with your real details.
+// Business details, as shown on samat-alsakan.com.
 export const BUSINESS = {
+  appName: 'Samat Alsakan',
   nameAr: 'سمات السكن',
-  nameEn: 'Samat Al-Sakan',
-  taglineAr: 'عقارك المناسب في جدة',
-  city: 'جدة',
-  // International format, digits only (966 + number without the leading 0). PLACEHOLDER.
-  whatsapp: '966500000000',
-  phone: '+966500000000',
-  email: 'info@example.com',
-  website: 'https://samatisecond.com',
-  falLicense: '', // REGA / FAL license number, shown on the contact screen when filled
+  subtitleAr: 'للاستثمار العقاري',
+  taglineAr: 'نقدم العقار بصورة تليق بقيمته، ونصنع لكل فرصة حضوراً يلفت الانتباه ويقود إلى القرار الصحيح.',
+  whatsapp: '966555282922', // digits only, international format
+  phones: ['+966555282922', '+966559955075'],
+  email: 'Sematalsakan@hotmail.com',
+  website: 'https://samat-alsakan.com',
+  falLicense: '1100304235',
+  commercialRegistration: '7052161564',
+  mapUrl: 'https://maps.app.goo.gl/Evt2CyFEZKeCjdh99',
+  social: [
+    { label: 'Instagram', url: 'https://www.instagram.com/samatalsakan' },
+    { label: 'X', url: 'https://x.com/samatAlsakan' },
+    { label: 'Snapchat', url: 'https://www.snapchat.com/add/samatalsakan' },
+    { label: 'TikTok', url: 'https://www.tiktok.com/@samatalsakan' },
+    { label: 'Telegram', url: 'https://t.me/jeddah3qarat' },
+  ],
 };

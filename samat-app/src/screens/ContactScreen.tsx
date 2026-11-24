@@ -1,26 +1,31 @@
 import { useState } from 'react';
-import { ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { BUSINESS } from '../config';
 import { colors, radius } from '../theme';
-import { PropertyType, TYPE_LABEL } from '../data/listings';
+import { TYPES } from '../data/listings';
 import { Button, Chip, T } from '../components/ui';
-import { call, email, whatsapp } from '../contact';
+import { call, email, open, whatsapp } from '../contact';
 
-// "Request a property": the buyer describes what they want and it is sent to you on WhatsApp. No server needed.
+type Mode = 'want' | 'offer';
+
+// The buyer's request (or a property someone wants to list) is sent to the office on WhatsApp. No server needed.
 export function ContactScreen() {
+  const [mode, setMode] = useState<Mode>('want');
   const [name, setName] = useState('');
-  const [type, setType] = useState<PropertyType>('apartment');
-  const [district, setDistrict] = useState('');
+  const [type, setType] = useState(TYPES[0] ?? 'أرض');
+  const [where, setWhere] = useState('');
+  const [area, setArea] = useState('');
   const [budget, setBudget] = useState('');
   const [notes, setNotes] = useState('');
 
   const send = () => {
     const lines = [
-      'السلام عليكم، أبحث عن عقار:',
+      mode === 'want' ? 'السلام عليكم، أبحث عن عقار:' : 'السلام عليكم، أرغب بعرض عقاري لديكم:',
       name && `الاسم: ${name}`,
-      `النوع: ${TYPE_LABEL[type]}`,
-      district && `الحي المفضل: ${district}`,
-      budget && `الميزانية: ${budget} ريال`,
+      `النوع: ${type}`,
+      where && `${mode === 'want' ? 'الموقع المفضل' : 'الموقع'}: ${where}`,
+      area && `المساحة: ${area} م²`,
+      budget && `${mode === 'want' ? 'الميزانية' : 'السعر المطلوب'}: ${budget} ريال`,
       notes && `ملاحظات: ${notes}`,
     ].filter(Boolean);
     whatsapp(lines.join('\n'));
@@ -29,30 +34,44 @@ export function ContactScreen() {
   return (
     <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 32 }} keyboardShouldPersistTaps="handled">
       <View style={styles.card}>
-        <T style={styles.h}>{BUSINESS.nameAr}</T>
-        <T style={styles.p}>تواصل معنا مباشرة وسيقوم فريقنا بخدمتك.</T>
-        {BUSINESS.falLicense ? <T style={styles.p}>رخصة فال: {BUSINESS.falLicense}</T> : null}
+        <T style={styles.h}>{BUSINESS.nameAr} {BUSINESS.subtitleAr}</T>
+        <T style={styles.p}>وساطة عقارية · تسويق عقاري · إدارة أملاك · تطوير عقاري</T>
         <View style={styles.row}>
           <Button label="واتساب" color={colors.whatsapp} onPress={() => whatsapp('السلام عليكم')} style={{ flex: 1 }} />
-          <Button label="اتصال" onPress={call} style={{ flex: 1 }} />
+          <Button label="البريد" outline onPress={email} style={{ flex: 1 }} />
         </View>
-        <Button label="البريد الإلكتروني" outline onPress={email} style={{ marginTop: 10 }} />
+        {BUSINESS.phones.map((p) => (
+          <Button key={p} label={`اتصال  ${p.replace('+966', '0')}`} onPress={() => call(p)} style={{ marginTop: 10 }} />
+        ))}
+        <Button label="موقع المكتب على الخريطة" outline onPress={() => open(BUSINESS.mapUrl)} style={{ marginTop: 10 }} />
+        <View style={styles.social}>
+          {BUSINESS.social.map((s) => (
+            <Pressable key={s.label} onPress={() => open(s.url)} style={styles.socialItem} accessibilityRole="link">
+              <T style={styles.socialText}>{s.label}</T>
+            </Pressable>
+          ))}
+        </View>
+        <T style={styles.legal}>ترخيص فال: {BUSINESS.falLicense} · سجل تجاري: {BUSINESS.commercialRegistration}</T>
       </View>
 
       <View style={styles.card}>
-        <T style={styles.h}>اطلب عقارك</T>
-        <T style={styles.p}>لم تجد ما تبحث عنه؟ أخبرنا بطلبك وسنبحث لك.</T>
+        <View style={styles.tabs}>
+          <Chip label="أبحث عن عقار" active={mode === 'want'} onPress={() => setMode('want')} />
+          <Chip label="أضف عقارك" active={mode === 'offer'} onPress={() => setMode('offer')} />
+        </View>
+        <T style={styles.p}>
+          {mode === 'want' ? 'لم تجد ما تبحث عنه؟ أخبرنا بطلبك وسنبحث لك.' : 'لديك عقار للبيع أو الإيجار؟ أرسل تفاصيله وسنتواصل معك.'}
+        </T>
         <Field label="الاسم" value={name} onChange={setName} />
         <T style={styles.label}>نوع العقار</T>
         <View style={styles.chips}>
-          {(Object.keys(TYPE_LABEL) as PropertyType[]).map((t) => (
-            <Chip key={t} label={TYPE_LABEL[t]} active={type === t} onPress={() => setType(t)} />
-          ))}
+          {TYPES.map((t) => <Chip key={t} label={t} active={type === t} onPress={() => setType(t)} />)}
         </View>
-        <Field label="الحي المفضل" value={district} onChange={setDistrict} />
-        <Field label="الميزانية (ريال)" value={budget} onChange={setBudget} numeric />
+        <Field label={mode === 'want' ? 'الحي أو المدينة المفضلة' : 'الحي والمدينة'} value={where} onChange={setWhere} />
+        <Field label="المساحة (م²)" value={area} onChange={setArea} numeric />
+        <Field label={mode === 'want' ? 'الميزانية (ريال)' : 'السعر المطلوب (ريال)'} value={budget} onChange={setBudget} numeric />
         <Field label="ملاحظات" value={notes} onChange={setNotes} multiline />
-        <Button label="إرسال الطلب عبر واتساب" color={colors.whatsapp} onPress={send} style={{ marginTop: 14 }} />
+        <Button label="إرسال عبر واتساب" color={colors.whatsapp} onPress={send} style={{ marginTop: 14 }} />
       </View>
     </ScrollView>
   );
@@ -81,8 +100,13 @@ const styles = StyleSheet.create({
     backgroundColor: colors.card, borderRadius: radius.lg, padding: 16, marginBottom: 16, borderWidth: 1, borderColor: colors.border,
   },
   h: { fontSize: 19, fontWeight: '800', color: colors.primary },
-  p: { color: colors.muted, marginTop: 4, lineHeight: 22 },
+  p: { color: colors.muted, marginTop: 6, lineHeight: 22 },
   row: { flexDirection: 'row', gap: 10, marginTop: 14 },
+  tabs: { flexDirection: 'row', marginStart: -8 },
+  social: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 14 },
+  socialItem: { paddingHorizontal: 12, paddingVertical: 7, borderRadius: 999, backgroundColor: colors.bg },
+  socialText: { fontSize: 13, color: colors.primary, fontWeight: '600' },
+  legal: { fontSize: 12, color: colors.muted, marginTop: 14 },
   label: { fontSize: 13, color: colors.muted, marginTop: 12, marginBottom: 6 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginStart: -8 },
   input: {

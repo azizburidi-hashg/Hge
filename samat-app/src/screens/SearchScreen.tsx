@@ -1,43 +1,45 @@
 import { useMemo, useState } from 'react';
 import { FlatList, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { colors, radius } from '../theme';
-import { DISTRICTS, LISTINGS, PropertyType, Purpose, TYPE_LABEL } from '../data/listings';
+import { CITIES, Listing, LISTINGS, Purpose, PURPOSE_LABEL, PURPOSES, TYPES } from '../data/listings';
 import { ListingCard } from '../components/ListingCard';
 import { Chip, T } from '../components/ui';
 import type { ScreenProps, SearchParams } from './types';
 
-type Sort = 'newest' | 'priceAsc' | 'priceDesc' | 'areaDesc';
+type Sort = 'site' | 'priceAsc' | 'priceDesc' | 'areaDesc';
 const SORT_LABEL: Record<Sort, string> = {
-  newest: 'الأحدث', priceAsc: 'السعر: الأقل', priceDesc: 'السعر: الأعلى', areaDesc: 'المساحة: الأكبر',
+  site: 'الترتيب الافتراضي', priceAsc: 'السعر: الأقل', priceDesc: 'السعر: الأعلى', areaDesc: 'المساحة: الأكبر',
 };
 
 export function SearchScreen({ openListing, fav, initial }: ScreenProps & { initial: SearchParams }) {
   const [query, setQuery] = useState(initial.query ?? '');
   const [purpose, setPurpose] = useState<Purpose | undefined>(initial.purpose);
-  const [type, setType] = useState<PropertyType | undefined>(initial.type);
-  const [district, setDistrict] = useState<string | undefined>();
-  const [maxPrice, setMaxPrice] = useState('');
-  const [sort, setSort] = useState<Sort>('newest');
+  const [type, setType] = useState<string | undefined>(initial.type);
+  const [city, setCity] = useState<string | undefined>();
+  const [minArea, setMinArea] = useState('');
+  const [sort, setSort] = useState<Sort>('site');
 
   const results = useMemo(() => {
     const q = query.trim();
-    const max = Number(maxPrice.replace(/[^\d]/g, '')) || Infinity;
+    const min = Number(minArea.replace(/[^\d]/g, '')) || 0;
     const list = LISTINGS.filter(
       (l) =>
         (!purpose || l.purpose === purpose) &&
         (!type || l.type === type) &&
-        (!district || l.district === district) &&
-        l.price <= max &&
-        (!q || l.title.includes(q) || l.district.includes(q) || TYPE_LABEL[l.type].includes(q) || l.description.includes(q)),
+        (!city || l.city === city) &&
+        (!min || (l.area ?? 0) >= min) &&
+        (!q || [l.title, l.titleEn, l.location, l.city, l.type, l.description].some((s) => s.includes(q))),
     );
-    const by: Record<Sort, (a: typeof list[0], b: typeof list[0]) => number> = {
-      newest: (a, b) => a.addedDaysAgo - b.addedDaysAgo,
-      priceAsc: (a, b) => a.price - b.price,
-      priceDesc: (a, b) => b.price - a.price,
-      areaDesc: (a, b) => b.area - a.area,
+    // Listings without a number sort last.
+    const val = (l: Listing, k: 'price' | 'area', dir: 1 | -1) => (l[k] === null ? Infinity : dir * (l[k] as number));
+    const by: Record<Sort, (a: Listing, b: Listing) => number> = {
+      site: (a, b) => a.order - b.order,
+      priceAsc: (a, b) => val(a, 'price', 1) - val(b, 'price', 1),
+      priceDesc: (a, b) => val(a, 'price', -1) - val(b, 'price', -1),
+      areaDesc: (a, b) => val(a, 'area', -1) - val(b, 'area', -1),
     };
     return [...list].sort(by[sort]);
-  }, [query, purpose, type, district, maxPrice, sort]);
+  }, [query, purpose, type, city, minArea, sort]);
 
   const filters = (
     <View style={{ paddingTop: 12 }}>
@@ -46,39 +48,36 @@ export function SearchScreen({ openListing, fav, initial }: ScreenProps & { init
         <TextInput
           value={query}
           onChangeText={setQuery}
-          placeholder="ابحث بالحي أو الوصف"
+          placeholder="ابحث بالحي أو المدينة أو الوصف"
           placeholderTextColor={colors.muted}
           style={styles.input}
         />
       </View>
       <Row>
         <Chip label="الكل" active={!purpose} onPress={() => setPurpose(undefined)} />
-        <Chip label="للبيع" active={purpose === 'sale'} onPress={() => setPurpose('sale')} />
-        <Chip label="للإيجار" active={purpose === 'rent'} onPress={() => setPurpose('rent')} />
+        {PURPOSES.map((p) => (
+          <Chip key={p} label={PURPOSE_LABEL[p]} active={purpose === p} onPress={() => setPurpose(p)} />
+        ))}
       </Row>
       <Row>
         <Chip label="كل الأنواع" active={!type} onPress={() => setType(undefined)} />
-        {(Object.keys(TYPE_LABEL) as PropertyType[]).map((t) => (
-          <Chip key={t} label={TYPE_LABEL[t]} active={type === t} onPress={() => setType(t)} />
-        ))}
+        {TYPES.map((t) => <Chip key={t} label={t} active={type === t} onPress={() => setType(t)} />)}
       </Row>
       <Row>
-        <Chip label="كل الأحياء" active={!district} onPress={() => setDistrict(undefined)} />
-        {DISTRICTS.map((d) => (
-          <Chip key={d} label={d} active={district === d} onPress={() => setDistrict(d)} />
-        ))}
+        <Chip label="كل المدن" active={!city} onPress={() => setCity(undefined)} />
+        {CITIES.map((c) => <Chip key={c} label={c} active={city === c} onPress={() => setCity(c)} />)}
       </Row>
       <View style={[styles.searchBox, { marginTop: 10 }]}>
-        <T style={{ color: colors.muted }} numberOfLines={1}>الحد الأعلى</T>
+        <T style={{ color: colors.muted, flexShrink: 0 }}>أقل مساحة</T>
         <TextInput
-          value={maxPrice}
-          onChangeText={setMaxPrice}
+          value={minArea}
+          onChangeText={setMinArea}
           keyboardType="number-pad"
-          placeholder="مثال: 1000000"
+          placeholder="مثال: 1000"
           placeholderTextColor={colors.muted}
           style={styles.input}
         />
-        <T style={{ color: colors.muted }}>ريال</T>
+        <T style={{ color: colors.muted }}>م²</T>
       </View>
       <Row>
         {(Object.keys(SORT_LABEL) as Sort[]).map((s) => (
@@ -111,7 +110,12 @@ export function SearchScreen({ openListing, fav, initial }: ScreenProps & { init
 
 function Row({ children }: { children: React.ReactNode }) {
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 10 }} contentContainerStyle={{ paddingEnd: 16, paddingStart: 8 }}>
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      style={{ marginTop: 10 }}
+      contentContainerStyle={{ paddingEnd: 16, paddingStart: 8 }}
+    >
       {children}
     </ScrollView>
   );

@@ -1,12 +1,14 @@
+// Colors from samat-alsakan.com.
 export const colors = {
-  primary: '#0F4C5C',
-  primaryDark: '#0A3540',
-  accent: '#C9A227',
-  bg: '#F6F4EF',
+  primary: '#00264D', // navy
+  primaryDark: '#001A36',
+  accent: '#C8A45D', // gold
+  teal: '#006D7A',
+  bg: '#F4F6F5',
   card: '#FFFFFF',
-  text: '#1C2326',
-  muted: '#6B7478',
-  border: '#E4E0D6',
+  text: '#16363B',
+  muted: '#667A7D',
+  border: '#E2E7E6',
   whatsapp: '#25D366',
   danger: '#C0392B',
 };

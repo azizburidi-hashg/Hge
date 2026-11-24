@@ -1,6 +1,6 @@
-import { Pressable, StyleSheet, Text, TextProps, View, ViewStyle } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, TextProps, useWindowDimensions, ViewStyle } from 'react-native';
 import { colors, radius } from '../theme';
-import { Listing, TYPE_ICON, TYPE_LABEL } from '../data/listings';
+import type { Listing } from '../data/listings';
 
 // Arabic text, right-aligned.
 export function T({ style, ...rest }: TextProps) {
@@ -39,13 +39,26 @@ export function Button({
   );
 }
 
-// Stand-in for a property photo until real photos are added.
-export function Photo({ listing, height }: { listing: Listing; height: number }) {
+// The listing's photo (the poster from the website).
+export function Photo({ listing, height, full }: { listing: Listing; height?: number; full?: boolean }) {
+  const { width } = useWindowDimensions();
+  if (full) {
+    return (
+      <Image
+        source={listing.image}
+        accessibilityLabel={listing.title}
+        style={{ width: '100%', height: width / (listing.imageRatio || 3 / 4), backgroundColor: colors.border }}
+        resizeMode="contain"
+      />
+    );
+  }
   return (
-    <View style={[styles.photo, { height, backgroundColor: `hsl(${listing.hue}, 35%, 82%)` }]}>
-      <Text style={{ fontSize: height * 0.32 }}>{TYPE_ICON[listing.type]}</Text>
-      <T style={styles.photoLabel}>{TYPE_LABEL[listing.type]} · {listing.district}</T>
-    </View>
+    <Image
+      source={listing.image}
+      accessibilityLabel={listing.title}
+      style={{ width: '100%', height, backgroundColor: colors.border }}
+      resizeMode="cover"
+    />
   );
 }
 
@@ -64,7 +77,5 @@ const styles = StyleSheet.create({
   chipTextActive: { color: '#fff', fontWeight: '600' },
   button: { paddingVertical: 13, paddingHorizontal: 16, borderRadius: radius.md, alignItems: 'center', justifyContent: 'center' },
   buttonText: { color: '#fff', fontWeight: '700', fontSize: 16, textAlign: 'center' },
-  photo: { width: '100%', alignItems: 'center', justifyContent: 'center' },
-  photoLabel: { color: colors.primaryDark, fontSize: 13, marginTop: 4, textAlign: 'center' },
   section: { fontSize: 18, fontWeight: '700', marginBottom: 10, marginTop: 18, paddingHorizontal: 16 },
 });

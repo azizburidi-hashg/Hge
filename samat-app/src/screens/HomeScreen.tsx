@@ -1,26 +1,45 @@
 import { FlatList, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { BUSINESS } from '../config';
 import { colors, radius } from '../theme';
-import { LISTINGS, PropertyType, TYPE_ICON, TYPE_LABEL } from '../data/listings';
+import { Listing, LISTINGS, TYPES, typeIcon } from '../data/listings';
 import { ListingCard } from '../components/ListingCard';
 import { SectionTitle, T } from '../components/ui';
 import type { ScreenProps } from './types';
 
-const TYPES: PropertyType[] = ['apartment', 'villa', 'land', 'floor', 'commercial'];
-
 export function HomeScreen({ openListing, fav, goSearch }: ScreenProps) {
-  const featured = LISTINGS.filter((l) => l.featured);
-  const latest = [...LISTINGS].sort((a, b) => a.addedDaysAgo - b.addedDaysAgo).slice(0, 4);
+  const featured = LISTINGS.filter((l) => l.purpose !== 'wanted').slice(0, 8);
+  const lands = LISTINGS.filter((l) => l.type === 'أرض' && l.purpose !== 'wanted');
+  const count = (t: string) => LISTINGS.filter((l) => l.type === t).length;
+
+  const row = (data: Listing[]) => (
+    <FlatList
+      horizontal
+      data={data}
+      keyExtractor={(l) => l.id}
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={{ paddingEnd: 16 }}
+      renderItem={({ item }) => (
+        <ListingCard
+          compact
+          listing={item}
+          onPress={() => openListing(item.id)}
+          isFavorite={fav.has(item.id)}
+          onToggleFavorite={() => fav.toggle(item.id)}
+        />
+      )}
+    />
+  );
 
   return (
     <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
       <View style={styles.hero}>
-        <T style={styles.brand}>{BUSINESS.nameAr}</T>
+        <T style={styles.brandSmall}>{BUSINESS.nameAr}</T>
+        <T style={styles.brand}>{BUSINESS.subtitleAr}</T>
         <T style={styles.tagline}>{BUSINESS.taglineAr}</T>
         <View style={styles.searchBox}>
           <Text style={{ fontSize: 16 }}>🔍</Text>
           <TextInput
-            placeholder="ابحث بالحي أو نوع العقار"
+            placeholder="ابحث بالحي أو المدينة أو نوع العقار"
             placeholderTextColor={colors.muted}
             style={styles.searchInput}
             returnKeyType="search"
@@ -29,45 +48,24 @@ export function HomeScreen({ openListing, fav, goSearch }: ScreenProps) {
         </View>
       </View>
 
-      <View style={styles.types}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.types}>
         {TYPES.map((t) => (
           <Pressable key={t} style={styles.typeItem} onPress={() => goSearch({ type: t })} accessibilityRole="button">
-            <View style={styles.typeIcon}><Text style={{ fontSize: 24 }}>{TYPE_ICON[t]}</Text></View>
-            <T style={styles.typeLabel}>{TYPE_LABEL[t]}</T>
+            <View style={styles.typeIcon}><Text style={{ fontSize: 24 }}>{typeIcon(t)}</Text></View>
+            <T style={styles.typeLabel}>{t}</T>
+            <T style={styles.typeCount}>{count(t)}</T>
           </Pressable>
         ))}
-      </View>
+      </ScrollView>
 
       <SectionTitle>عقارات مميزة</SectionTitle>
-      <FlatList
-        horizontal
-        data={featured}
-        keyExtractor={(l) => l.id}
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingEnd: 16 }}
-        renderItem={({ item }) => (
-          <ListingCard
-            compact
-            listing={item}
-            onPress={() => openListing(item.id)}
-            isFavorite={fav.has(item.id)}
-            onToggleFavorite={() => fav.toggle(item.id)}
-          />
-        )}
-      />
+      {row(featured)}
 
-      <SectionTitle>أحدث العروض</SectionTitle>
-      {latest.map((l) => (
-        <ListingCard
-          key={l.id}
-          listing={l}
-          onPress={() => openListing(l.id)}
-          isFavorite={fav.has(l.id)}
-          onToggleFavorite={() => fav.toggle(l.id)}
-        />
-      ))}
-      <Pressable onPress={() => goSearch({})} style={styles.more} accessibilityRole="button">
-        <T style={styles.moreText}>عرض كل العقارات ←</T>
+      <SectionTitle>{`أراضٍ للبيع (${lands.length})`}</SectionTitle>
+      {row(lands)}
+
+      <Pressable onPress={() => goSearch({})} style={styles.all} accessibilityRole="button">
+        <T style={styles.allText}>{`عرض كل العقارات (${LISTINGS.length}) ←`}</T>
       </Pressable>
     </ScrollView>
   );
@@ -75,23 +73,28 @@ export function HomeScreen({ openListing, fav, goSearch }: ScreenProps) {
 
 const styles = StyleSheet.create({
   hero: {
-    backgroundColor: colors.primary, paddingHorizontal: 16, paddingTop: 20, paddingBottom: 22,
+    backgroundColor: colors.primary, paddingHorizontal: 16, paddingTop: 18, paddingBottom: 22,
     borderBottomLeftRadius: radius.lg, borderBottomRightRadius: radius.lg,
   },
-  brand: { color: '#fff', fontSize: 26, fontWeight: '800' },
-  tagline: { color: '#D8E6E9', fontSize: 15, marginTop: 4, marginBottom: 16 },
+  brandSmall: { color: '#DCE3EA', fontSize: 15 },
+  brand: { color: '#fff', fontSize: 28, fontWeight: '800', marginTop: 2 },
+  tagline: { color: '#C9D3DD', fontSize: 14, marginTop: 8, marginBottom: 16, lineHeight: 22 },
   searchBox: {
     flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', borderRadius: radius.md,
     paddingHorizontal: 12, gap: 8,
   },
   searchInput: { flex: 1, paddingVertical: 12, fontSize: 15, textAlign: 'right', writingDirection: 'rtl', color: colors.text },
-  types: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 12, paddingTop: 18 },
-  typeItem: { alignItems: 'center', flex: 1 },
+  types: { paddingHorizontal: 8, paddingTop: 18, gap: 6 },
+  typeItem: { alignItems: 'center', width: 76 },
   typeIcon: {
-    width: 54, height: 54, borderRadius: 16, backgroundColor: colors.card, alignItems: 'center', justifyContent: 'center',
+    width: 56, height: 56, borderRadius: 16, backgroundColor: colors.card, alignItems: 'center', justifyContent: 'center',
     borderWidth: 1, borderColor: colors.border,
   },
   typeLabel: { fontSize: 13, marginTop: 6, textAlign: 'center' },
-  more: { alignItems: 'center', paddingVertical: 8 },
-  moreText: { color: colors.primary, fontWeight: '700', textAlign: 'center' },
+  typeCount: { fontSize: 11, color: colors.muted, textAlign: 'center' },
+  all: {
+    marginHorizontal: 16, marginTop: 22, paddingVertical: 14, borderRadius: radius.md, backgroundColor: colors.accent,
+    alignItems: 'center',
+  },
+  allText: { color: colors.primary, fontWeight: '800', textAlign: 'center', fontSize: 16 },
 });

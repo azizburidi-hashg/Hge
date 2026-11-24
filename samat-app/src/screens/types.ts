@@ -1,9 +1,9 @@
-import type { PropertyType, Purpose } from '../data/listings';
+import type { Purpose } from '../data/listings';
 import type { useFavorites } from '../favorites';
 
 export interface SearchParams {
   query?: string;
-  type?: PropertyType;
+  type?: string;
   purpose?: Purpose;
 }
 

@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors, radius } from '../theme';
-import { formatPrice, Listing, PURPOSE_LABEL } from '../data/listings';
+import { formatArea, formatPrice, Listing, place, PURPOSE_LABEL } from '../data/listings';
 import { Photo, T } from './ui';
 
 interface Props {
@@ -12,16 +12,19 @@ interface Props {
 }
 
 export function ListingCard({ listing: l, onPress, isFavorite, onToggleFavorite, compact }: Props) {
+  const meta = [l.type, place(l), l.area ? formatArea(l.area) : '', l.rooms ? `${l.rooms} غرف` : '']
+    .filter(Boolean)
+    .join(' · ');
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel={`${l.title}، ${l.district}، ${formatPrice(l)}`}
+      accessibilityLabel={`${l.title}، ${formatPrice(l)}`}
       style={({ pressed }) => [styles.card, compact && styles.compact, pressed && { opacity: 0.9 }]}
     >
       <View>
-        <Photo listing={l} height={compact ? 120 : 170} />
-        <View style={styles.badge}>
+        <Photo listing={l} height={compact ? 190 : 230} />
+        <View style={[styles.badge, l.purpose === 'wanted' && { backgroundColor: colors.teal }]}>
           <T style={styles.badgeText}>{PURPOSE_LABEL[l.purpose]}</T>
         </View>
         <Pressable
@@ -35,11 +38,9 @@ export function ListingCard({ listing: l, onPress, isFavorite, onToggleFavorite,
         </Pressable>
       </View>
       <View style={styles.body}>
-        <T style={styles.price}>{formatPrice(l)}</T>
-        <T style={styles.title} numberOfLines={1}>{l.title}</T>
-        <T style={styles.meta} numberOfLines={1}>
-          📍 {l.district} · {l.area} م²{l.rooms ? ` · ${l.rooms} غرف` : ''}
-        </T>
+        <T style={styles.title} numberOfLines={2}>{l.title}</T>
+        <T style={styles.price} numberOfLines={1}>{formatPrice(l)}</T>
+        <T style={styles.meta} numberOfLines={1}>{meta}</T>
       </View>
     </Pressable>
   );
@@ -50,18 +51,18 @@ const styles = StyleSheet.create({
     backgroundColor: colors.card, borderRadius: radius.lg, overflow: 'hidden', marginHorizontal: 16, marginBottom: 14,
     borderWidth: 1, borderColor: colors.border,
   },
-  compact: { width: 230, marginHorizontal: 0, marginStart: 16, marginBottom: 4 },
+  compact: { width: 250, marginHorizontal: 0, marginStart: 16, marginBottom: 4 },
   badge: {
-    position: 'absolute', top: 10, start: 10, backgroundColor: colors.primary, borderRadius: 999,
-    paddingHorizontal: 10, paddingVertical: 3,
+    position: 'absolute', bottom: 10, start: 10, backgroundColor: colors.primary, borderRadius: 999,
+    paddingHorizontal: 12, paddingVertical: 4,
   },
-  badgeText: { color: '#fff', fontSize: 12, fontWeight: '600' },
+  badgeText: { color: '#fff', fontSize: 12, fontWeight: '700' },
   fav: {
-    position: 'absolute', top: 8, end: 8, backgroundColor: 'rgba(255,255,255,0.92)', borderRadius: 999,
+    position: 'absolute', top: 8, end: 8, backgroundColor: 'rgba(255,255,255,0.95)', borderRadius: 999,
     width: 36, height: 36, alignItems: 'center', justifyContent: 'center',
   },
-  body: { padding: 12, gap: 3 },
-  price: { fontSize: 17, fontWeight: '800', color: colors.primary },
-  title: { fontSize: 15, fontWeight: '600' },
+  body: { padding: 12, gap: 4 },
+  title: { fontSize: 16, fontWeight: '700', color: colors.primary, lineHeight: 23 },
+  price: { fontSize: 16, fontWeight: '800', color: colors.accent },
   meta: { fontSize: 13, color: colors.muted },
 });

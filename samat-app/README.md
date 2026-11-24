@@ -1,4 +1,4 @@
-# سمات السكن: the app
+# Samat Alsakan: the app
 
 An iPhone and Android app (built with Expo / React Native) for Samat Al-Sakan real estate in Jeddah. Arabic, right-to-left.
 
@@ -7,12 +7,17 @@ An iPhone and Android app (built with Expo / React Native) for Samat Al-Sakan re
 - **Properties:** search with filters (sale/rent, type, district, highest price) and sorting
 - **Property page:** price, details, description, share, and **WhatsApp** and **Call** buttons with the property already named in the message
 - **Favorites:** saved on the phone
-- **Contact:** WhatsApp, call and email, plus a **"Request a property"** form that sends the buyer's request to you on WhatsApp
+- **Contact:** WhatsApp, both phone numbers, email, map, social accounts, FAL license, plus a form to **request a property** or **list your property**, sent to you on WhatsApp
 
-## Before publishing (must do)
-1. `src/config.ts`: put in your real WhatsApp number, phone, email and FAL license number.
-2. `src/data/listings.ts`: **the listings are made-up samples.** Replace them with your real listings and photos, or connect the app to your website.
-3. `assets/`: replace the icon and splash images with your logo.
+## Listings come from the website
+All listings and their posters are copied from samat-alsakan.com. When you add or change listings on the website, run:
+```
+python3 scripts/sync_listings.py
+```
+then build and submit a new version of the app. Contact details, the FAL license and CR number are in `src/config.ts`.
+
+## Before publishing
+- `assets/icon.png` is a simple "SA" placeholder icon. Replace it with your logo (1024x1024 PNG).
 
 ## Try it
 ```
