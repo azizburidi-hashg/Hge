@@ -1,12 +1,13 @@
 import { FlatList, StyleSheet, View } from 'react-native';
 import { colors } from '../theme';
-import { LISTINGS } from '../data/listings';
+import { useListings } from '../data/store';
 import { ListingCard } from '../components/ListingCard';
 import { Button, T } from '../components/ui';
 import type { ScreenProps } from './types';
 
 export function FavoritesScreen({ openListing, fav, goSearch }: ScreenProps) {
-  const items = LISTINGS.filter((l) => fav.has(l.id));
+  const { listings } = useListings();
+  const items = listings.filter((l) => fav.has(l.id));
   return (
     <FlatList
       data={items}

@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
-import { FlatList, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { FlatList, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { colors, radius } from '../theme';
-import { CITIES, Listing, LISTINGS, Purpose, PURPOSE_LABEL, PURPOSES, TYPES } from '../data/listings';
+import { Listing, Purpose, PURPOSE_LABEL } from '../data/listings';
+import { useListings } from '../data/store';
 import { ListingCard } from '../components/ListingCard';
 import { Chip, T } from '../components/ui';
 import type { ScreenProps, SearchParams } from './types';
@@ -12,6 +13,7 @@ const SORT_LABEL: Record<Sort, string> = {
 };
 
 export function SearchScreen({ openListing, fav, initial }: ScreenProps & { initial: SearchParams }) {
+  const { listings: LISTINGS, types: TYPES, cities: CITIES, purposes: PURPOSES, refreshing, refresh } = useListings();
   const [query, setQuery] = useState(initial.query ?? '');
   const [purpose, setPurpose] = useState<Purpose | undefined>(initial.purpose);
   const [type, setType] = useState<string | undefined>(initial.type);
@@ -39,7 +41,7 @@ export function SearchScreen({ openListing, fav, initial }: ScreenProps & { init
       areaDesc: (a, b) => val(a, 'area', -1) - val(b, 'area', -1),
     };
     return [...list].sort(by[sort]);
-  }, [query, purpose, type, city, minArea, sort]);
+  }, [LISTINGS, query, purpose, type, city, minArea, sort]);
 
   const filters = (
     <View style={{ paddingTop: 12 }}>
@@ -96,6 +98,7 @@ export function SearchScreen({ openListing, fav, initial }: ScreenProps & { init
       ListEmptyComponent={<T style={styles.empty}>لا توجد عقارات مطابقة. جرّب تغيير الفلاتر.</T>}
       contentContainerStyle={{ paddingBottom: 24 }}
       keyboardShouldPersistTaps="handled"
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={colors.accent} />}
       renderItem={({ item }) => (
         <ListingCard
           listing={item}

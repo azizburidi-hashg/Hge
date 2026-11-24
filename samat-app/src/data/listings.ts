@@ -1,8 +1,9 @@
-// Listings come from samat-alsakan.com via scripts/sync_listings.py (see listings.generated.ts).
-import { LISTINGS } from './listings.generated';
+// The listings built into the app (from scripts/sync_listings.py). They are only shown on first launch until the
+// live listings arrive from samat-alsakan.com, or when the phone has never been online; see store.tsx.
+import { LISTINGS as BUNDLED_LISTINGS } from './listings.generated';
 import type { Listing, Purpose } from './types';
 
-export { LISTINGS };
+export { BUNDLED_LISTINGS };
 export type { Listing, Purpose };
 
 export const PURPOSE_LABEL: Record<Purpose, string> = { sale: 'للبيع', rent: 'للإيجار', wanted: 'مطلوب' };
@@ -17,9 +18,15 @@ const byCount = (values: string[]) => {
   values.filter(Boolean).forEach((v) => n.set(v, (n.get(v) ?? 0) + 1));
   return [...n.entries()].sort((a, b) => b[1] - a[1]).map(([v]) => v);
 };
-export const TYPES = byCount(LISTINGS.map((l) => l.type));
-export const CITIES = byCount(LISTINGS.map((l) => l.city));
-export const PURPOSES = (['sale', 'rent', 'wanted'] as Purpose[]).filter((p) => LISTINGS.some((l) => l.purpose === p));
+
+/** Filter options built from whatever listings are current. */
+export function derive(listings: Listing[]) {
+  return {
+    types: byCount(listings.map((l) => l.type)),
+    cities: byCount(listings.map((l) => l.city)),
+    purposes: (['sale', 'rent', 'wanted'] as Purpose[]).filter((p) => listings.some((l) => l.purpose === p)),
+  };
+}
 
 const fmt = (n: number) => n.toLocaleString('en-US', { maximumFractionDigits: 2 });
 

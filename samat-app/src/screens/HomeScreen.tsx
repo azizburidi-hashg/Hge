@@ -1,12 +1,15 @@
-import { FlatList, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { BUSINESS } from '../config';
 import { colors, radius } from '../theme';
-import { Listing, LISTINGS, TYPES, typeIcon } from '../data/listings';
+import { Listing, typeIcon } from '../data/listings';
+import { useListings } from '../data/store';
+import { UpdatedNote } from '../components/UpdatedNote';
 import { ListingCard } from '../components/ListingCard';
 import { SectionTitle, T } from '../components/ui';
 import type { ScreenProps } from './types';
 
 export function HomeScreen({ openListing, fav, goSearch }: ScreenProps) {
+  const { listings: LISTINGS, types: TYPES, refreshing, refresh } = useListings();
   const featured = LISTINGS.filter((l) => l.purpose !== 'wanted').slice(0, 8);
   const lands = LISTINGS.filter((l) => l.type === 'أرض' && l.purpose !== 'wanted');
   const count = (t: string) => LISTINGS.filter((l) => l.type === t).length;
@@ -31,7 +34,10 @@ export function HomeScreen({ openListing, fav, goSearch }: ScreenProps) {
   );
 
   return (
-    <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
+    <ScrollView
+      contentContainerStyle={{ paddingBottom: 24 }}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={colors.accent} />}
+    >
       <View style={styles.hero}>
         <T style={styles.brandSmall}>{BUSINESS.nameAr}</T>
         <T style={styles.brand}>{BUSINESS.subtitleAr}</T>
@@ -67,6 +73,7 @@ export function HomeScreen({ openListing, fav, goSearch }: ScreenProps) {
       <Pressable onPress={() => goSearch({})} style={styles.all} accessibilityRole="button">
         <T style={styles.allText}>{`عرض كل العقارات (${LISTINGS.length}) ←`}</T>
       </Pressable>
+      <UpdatedNote />
     </ScrollView>
   );
 }

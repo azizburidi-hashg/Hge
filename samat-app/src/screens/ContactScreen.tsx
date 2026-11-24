@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { BUSINESS } from '../config';
 import { colors, radius } from '../theme';
-import { TYPES } from '../data/listings';
+import { useListings } from '../data/store';
 import { Button, Chip, T } from '../components/ui';
 import { call, email, open, whatsapp } from '../contact';
 
@@ -10,6 +10,7 @@ type Mode = 'want' | 'offer';
 
 // The buyer's request (or a property someone wants to list) is sent to the office on WhatsApp. No server needed.
 export function ContactScreen() {
+  const { types: TYPES } = useListings();
   const [mode, setMode] = useState<Mode>('want');
   const [name, setName] = useState('');
   const [type, setType] = useState(TYPES[0] ?? 'أرض');

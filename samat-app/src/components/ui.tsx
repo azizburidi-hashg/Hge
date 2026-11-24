@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, TextProps, useWindowDimensions, ViewStyle } from 'react-native';
 import { colors, radius } from '../theme';
 import type { Listing } from '../data/listings';
@@ -42,12 +43,19 @@ export function Button({
 // The listing's photo (the poster from the website).
 export function Photo({ listing, height, full }: { listing: Listing; height?: number; full?: boolean }) {
   const { width } = useWindowDimensions();
+  const [measured, setMeasured] = useState(0);
+  const uri = (listing.image as { uri?: string })?.uri;
+  useEffect(() => {
+    if (!full || listing.imageRatio || !uri) return;
+    Image.getSize(uri, (w, h) => h && setMeasured(w / h), () => {});
+  }, [full, listing.imageRatio, uri]);
   if (full) {
+    const ratio = listing.imageRatio || measured || 3 / 4;
     return (
       <Image
         source={listing.image}
         accessibilityLabel={listing.title}
-        style={{ width: '100%', height: width / (listing.imageRatio || 3 / 4), backgroundColor: colors.border }}
+        style={{ width: '100%', height: width / ratio, backgroundColor: colors.border }}
         resizeMode="contain"
       />
     );

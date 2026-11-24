@@ -3,7 +3,7 @@ import { BackHandler, Platform, Pressable, StyleSheet, Text, View } from 'react-
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { colors } from './src/theme';
-import { LISTINGS } from './src/data/listings';
+import { ListingsProvider, useListings } from './src/data/store';
 import { useFavorites } from './src/favorites';
 import { T } from './src/components/ui';
 import { HomeScreen } from './src/screens/HomeScreen';
@@ -27,6 +27,15 @@ if (Platform.OS === 'web' && typeof document !== 'undefined') {
 }
 
 export default function App() {
+  return (
+    <ListingsProvider>
+      <Main />
+    </ListingsProvider>
+  );
+}
+
+function Main() {
+  const { listings } = useListings();
   const [tab, setTab] = useState<Tab>('home');
   const [openId, setOpenId] = useState<string | null>(null);
   const [search, setSearch] = useState<{ params: SearchParams; key: number }>({ params: {}, key: 0 });
@@ -48,7 +57,7 @@ export default function App() {
     setTab('search');
   };
   const props = { openListing: setOpenId, fav, goSearch };
-  const listing = openId ? LISTINGS.find((l) => l.id === openId) : undefined;
+  const listing = openId ? listings.find((l) => l.id === openId) : undefined;
 
   return (
     <SafeAreaProvider>
