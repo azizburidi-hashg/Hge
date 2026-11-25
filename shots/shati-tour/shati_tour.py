@@ -6,8 +6,8 @@ services, word-by-word Arabic captions, synthesized whoosh / pop / boom sounds,
 light colour grade, the Samat Alsakan end card from the user's earlier ad.
 
 Usage:
-  python shati_tour.py A.mov B.mov endcard_ad.mp4 out.mp4
-  python shati_tour.py A.mov B.mov endcard_ad.mp4 <outdir> --stills 1.0 3.5 ...
+  python shati_tour.py A.mov B.mov endcard_ad.mp4 drone.mp4 out.mp4
+  python shati_tour.py A.mov B.mov endcard_ad.mp4 drone.mp4 <outdir> --stills 1.0 3.5 ...
 Every caption word is from the user's own voice (speech-to-text, checked by hand).
 """
 import math, os, subprocess, sys, wave
@@ -28,6 +28,7 @@ SEGS = [
     ("B", 3.30, 2.00, 3, "drive"),   # silent stretch, sped up 3x
     ("B", 5.30, 7.30, 1, "talk"),
     ("B", 12.60, 4.00, 1, "pan"),
+    ("D", 0.00, 3.00, 1, "drone"),   # Higgsfield (Kling 4.0 Flash) drone reveal from the pan's last frame
     ("E", 34.00, 3.50, 1, "end"),    # Samat Alsakan card from the earlier ad
 ]
 NF = [round(d * FPS / sp) for _, _, d, sp, _ in SEGS]
@@ -51,7 +52,7 @@ def seg_at(t):
 
 
 BOUNDS = [(OUT0[1], "whip", 0.6), (OUT0[2], "whip", 0.35), (OUT0[4], "whip", 0.7),
-          (OUT0[5], "whip", 0.6), (OUT0[6], "flash", 0.95)]
+          (OUT0[5], "whip", 0.6), (OUT0[7], "flash", 0.95)]
 
 # ---------------- captions (word, start, end) in source time ----------------
 CAPS = [
@@ -86,7 +87,7 @@ SKY = [  # (from, to, lines[(text, size, colour, y_center[, x_center])])
     (O("A", 9.28), O("B", 0.50), [("حي", 100, YELLOW, 690), ("الشاطئ", 210, WHITE, 862)]),
     (O("B", 0.50), O("B", 1.90), [("مسطحات", 160, WHITE, 690), ("الخضرة", 180, YELLOW, 865)]),
     (O("B", 1.90), O("B", 3.30), [("حي", 100, YELLOW, 690), ("الفخامة", 200, WHITE, 865)]),
-    (O("B", 14.30), O("B", 16.55), [("حي", 100, YELLOW, 450, 470), ("الشاطئ", 220, WHITE, 625, 470)]),
+    (O("B", 14.30), O("D", 1.00), [("حي", 100, YELLOW, 450, 470), ("الشاطئ", 220, WHITE, 625, 470)]),
 ]
 
 # ---------------- glass cards ----------------
@@ -299,6 +300,8 @@ def base_zoom(i, clip, st, kind):
         if st - k0 < 0.12:
             z = prev + (z - prev) * ease_out((st - k0) / 0.12)
         return z, FACE[clip]
+    if kind == "drone":
+        return 1.0, (540, 960)
     if kind in ("drive", "pan"):
         return 1.0 + 0.07 * frac, (540, 900)
     return 1.0 + 0.04 * frac, (540, 960)
@@ -419,7 +422,7 @@ def build_audio(path):
     parts = []
     for (clip, s, d, sp, kind), n in zip(SEGS, NF):
         dur = n / FPS
-        parts.append(np.zeros((int(round(dur * SR)), 2), np.float32) if kind == "end"
+        parts.append(np.zeros((int(round(dur * SR)), 2), np.float32) if kind in ("end", "drone")
                      else load_audio(clip, s, dur))  # sped-up stretch: keep its quiet road sound
     mix = np.vstack(parts)
     total = int(round(TOTAL / FPS * SR))
@@ -439,6 +442,7 @@ def build_audio(path):
         else:
             add(whoosh(0.6, seed=9), tb - 0.33, 0.28)
             add(boom(), tb, 0.6)
+    add(whoosh(1.4, seed=21), OUT0[6] - 0.1, 0.30)  # rising air as the drone lifts off
     for a, *_ in SKY:
         add(pop(700), a, 0.18)
     for a, *_ in CHIPS:
@@ -452,7 +456,7 @@ def build_audio(path):
 
 
 def main():
-    SRC["A"], SRC["B"], SRC["E"], dst = sys.argv[1:5]
+    SRC["A"], SRC["B"], SRC["E"], SRC["D"], dst = sys.argv[1:6]
     if "--stills" in sys.argv:
         os.makedirs(dst, exist_ok=True)
         for ts in sys.argv[sys.argv.index("--stills") + 1:]:
