@@ -37,6 +37,7 @@ import wave
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 FONT_DIR = os.path.normpath(os.path.join(HERE, "..", "..", "blender-shots", "fonts"))
+AR_FONT_DIR = os.path.normpath(os.path.join(HERE, "..", "fonts"))  # Cairo (Arabic + Latin), OFL
 
 
 class PlanError(Exception):
@@ -76,8 +77,8 @@ def build_base(plan, W, H, fps, tmp):
         if e <= s:
             raise PlanError("clip %d: end must be after start" % i)
         part = os.path.join(tmp, "part%02d.mp4" % i)
-        vf = ("scale=%d:%d:force_original_aspect_ratio=increase,crop=%d:%d,setsar=1,fps=%d,format=yuv420p"
-              % (W, H, W, H, fps))
+        vf = ("scale=%d:%d:force_original_aspect_ratio=increase:flags=lanczos,crop=%d:%d,setsar=1,fps=%d,"
+              "unsharp=5:5:%.2f,format=yuv420p" % (W, H, W, H, fps, float(plan.get("sharpen", 0.0))))
         cmd = ["ffmpeg", "-y", "-v", "error", "-ss", "%.3f" % s, "-t", "%.3f" % (e - s), "-i", path]
         if has_audio:
             cmd += ["-vf", vf, "-af", "aresample=48000,aformat=channel_layouts=stereo"]
@@ -100,22 +101,29 @@ def build_base(plan, W, H, fps, tmp):
 # ---------------------------------------------------------------- cards (drawn by headless Chromium)
 CARD_CSS = """
 @font-face { font-family: Mont; src: url('file://%(fonts)s/Montserrat.ttf'); font-weight: 100 900; }
+@font-face { font-family: Cairo; src: url('file://%(ar)s/Cairo-arabic-400.ttf'); font-weight: 400; unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF, U+200C-200F; }
+@font-face { font-family: Cairo; src: url('file://%(ar)s/Cairo-arabic-800.ttf'); font-weight: 700 900; unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF, U+200C-200F; }
+@font-face { font-family: Cairo; src: url('file://%(ar)s/Cairo-latin-400.ttf'); font-weight: 400; unicode-range: U+0000-00FF, U+2000-206F, U+2190-21FF; }
+@font-face { font-family: Cairo; src: url('file://%(ar)s/Cairo-latin-800.ttf'); font-weight: 700 900; unicode-range: U+0000-00FF, U+2000-206F, U+2190-21FF; }
 html, body { margin: 0; background: transparent; }
+body.rtl { direction: rtl; font-family: Cairo, Mont, sans-serif; }
+body.rtl .card .row, body.rtl .stat .label { font-weight: 600; }
 body { width: %(W)dpx; display: flex; justify-content: center; padding: 30px 0; font-family: Mont, sans-serif; }
-.pill { background: rgba(0,0,0,.88); color: #fff; font-weight: 800; font-size: 40px; padding: 18px 40px;
+.pill { background: rgba(0,0,0,.88); color: #fff; font-weight: 800; font-size: 48px; padding: 20px 48px;
         border-radius: 999px; border: 2px solid rgba(255,255,255,.18); box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+.pill.big { font-size: 64px; padding: 22px 64px; }
 .card { width: %(cw)dpx; background: rgba(18,18,20,.72); border: 2px solid rgba(255,255,255,.22);
         border-radius: 36px; padding: 34px 44px; color: #fff; box-shadow: 0 20px 50px rgba(0,0,0,.45);
         backdrop-filter: blur(20px); }
-.card .title { font-weight: 800; font-size: 46px; margin-bottom: 18px; color: %(accent)s; }
-.card .row { display: flex; justify-content: space-between; font-size: 40px; padding: 14px 0;
+.card .title { font-weight: 800; font-size: 62px; margin-bottom: 18px; color: %(accent)s; }
+.card .row { display: flex; justify-content: space-between; font-size: 52px; padding: 16px 0;
              border-top: 1px solid rgba(255,255,255,.14); }
 .card .row:first-of-type { border-top: none; }
 .card .row b { font-weight: 800; }
 .stat { text-align: center; background: rgba(18,18,20,.72); border: 2px solid rgba(255,255,255,.22);
         border-radius: 36px; padding: 30px 60px; color: #fff; box-shadow: 0 20px 50px rgba(0,0,0,.45); }
 .stat .value { font-weight: 800; font-size: 96px; color: %(accent)s; line-height: 1.05; }
-.stat .label { font-size: 38px; opacity: .85; margin-top: 8px; }
+.stat .label { font-size: 44px; opacity: .85; margin-top: 8px; }
 .cta { width: %(cw)dpx; background: rgba(10,10,10,.9); border: 2px solid rgba(255,255,255,.2); border-radius: 30px;
        padding: 28px 36px; color: #fff; box-shadow: 0 20px 50px rgba(0,0,0,.5); }
 .cta .box { display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,.08);
@@ -135,8 +143,12 @@ const fs = require('fs');
   for (const j of jobs.items) {
     await page.setContent(j.html, { waitUntil: 'load' });
     await page.evaluate(() => document.fonts.ready);
-    const el = await page.$('#c');
-    await el.screenshot({ path: j.out, omitBackground: true });
+    if (j.box) {
+      await page.screenshot({ path: j.out, omitBackground: true, clip: { x: 0, y: 0, width: jobs.width, height: j.box } });
+    } else {
+      const el = await page.$('#c');
+      await el.screenshot({ path: j.out, omitBackground: true });
+    }
   }
   await browser.close();
 })().catch(e => { console.error(e); process.exit(1); });
@@ -147,10 +159,10 @@ def esc(s):
     return (str(s).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
 
 
-def card_html(card, W, accent):
+def card_html(card, W, accent, rtl=False):
     t = card.get("type", "card")
     if t == "pill":
-        inner = '<div class="pill">%s</div>' % esc(card["text"])
+        inner = '<div class="pill%s">%s</div>' % (" big" if card.get("big") else "", esc(card["text"]))
     elif t == "stat":
         inner = '<div class="stat"><div class="value">%s</div><div class="label">%s</div></div>' % (
             esc(card["value"]), esc(card.get("label", "")))
@@ -164,20 +176,21 @@ def card_html(card, W, accent):
         inner = '<div class="card">%s%s</div>' % (title, rows)
     else:
         raise PlanError("unknown card type: %s" % t)
-    css = CARD_CSS % {"fonts": FONT_DIR, "W": W, "cw": int(W * 0.78), "accent": accent}
-    return '<html><head><style>%s</style></head><body><div id="c">%s</div></body></html>' % (css, inner)
+    css = CARD_CSS % {"fonts": FONT_DIR, "ar": AR_FONT_DIR, "W": W, "cw": int(W * 0.78), "accent": accent}
+    return '<html><head><meta charset="utf-8"><style>%s</style></head><body class="%s"><div id="c">%s</div></body></html>' % (
+        css, "rtl" if rtl else "", inner)
 
 
-def render_cards(cards, W, accent, tmp):
+def render_cards(cards, W, accent, tmp, rtl=False):
     if not cards:
         return []
     items = []
     for i, c in enumerate(cards):
         out = os.path.join(tmp, "card%02d.png" % i)
-        items.append({"html": card_html(c, W, accent), "out": out})
+        items.append({"html": card_html(c, W, accent, rtl), "out": out})
     jobfile = os.path.join(tmp, "cards.json")
     with open(jobfile, "w") as f:
-        json.dump({"width": W, "items": items}, f)
+        json.dump({"width": W, "items": items}, f, ensure_ascii=False)
     script = os.path.join(tmp, "render_cards.js")
     with open(script, "w") as f:
         f.write(NODE_RENDER)
@@ -206,31 +219,91 @@ def ass_esc(s):
     return s.replace("\\", "").replace("{", "(").replace("}", ")")
 
 
-def build_captions(words, W, H, cfg, path):
-    size = int(cfg.get("size", 74))
-    y = float(cfg.get("y", 0.70))
-    accent = ass_color(cfg.get("accent", "#FFFFFF"))
-    maxw = int(cfg.get("max_words", 3))
+def caption_events(words, maxw):
+    """Short phrases (<= maxw words, split at punctuation and pauses); one event per spoken word,
+    returned as (start, end, [(word, is_current_word), ...])."""
     groups, cur = [], []
     for i, (w, s, e) in enumerate(words):
+        brk = w.endswith("|")  # "word|" = end the phrase here; the | is not shown
+        w = w.rstrip("|")
         cur.append((w, float(s), float(e)))
         gap = float(words[i + 1][1]) - float(e) if i + 1 < len(words) else 99
-        if len(cur) >= maxw or w[-1:] in ".,!?;:" or gap > 0.35:
+        if brk or len(cur) >= maxw or w[-1:] in ".,!?;:،؟" or gap > 0.35:
             groups.append(cur)
             cur = []
     if cur:
         groups.append(cur)
-    lines = []
+    events = []
     for g in groups:
         g_end = g[-1][2] + 0.08
         for k, (w, s, e) in enumerate(g):
             end = g[k + 1][1] if k + 1 < len(g) else g_end
-            parts = []
-            for j, (w2, _, _) in enumerate(g):
-                t = ass_esc(w2)
-                parts.append("{\\c%s}%s{\\c&H00FFFFFF}" % (accent, t) if j == k else t)
-            lines.append("Dialogue: 0,%s,%s,Cap,,0,0,0,,{\\an5\\pos(%d,%d)}%s"
-                         % (ass_time(s), ass_time(end), W // 2, int(H * y), " ".join(parts)))
+            events.append((s, end, [(w2, j == k) for j, (w2, _, _) in enumerate(g)]))
+    return events
+
+
+CAP_BOX = 320  # height of a caption frame in pixels
+
+
+def render_caption_track(words, W, cfg, rtl, dur, tmp):
+    """Captions drawn by Chromium (correct Arabic shaping, same fonts as the cards).
+    Returns a concat-demuxer list that plays the caption frames at the right times."""
+    size = int(cfg.get("size", 80))
+    outline = float(cfg.get("outline", 4))
+    accent = cfg.get("accent", "#FFFFFF")
+    css = CARD_CSS % {"fonts": FONT_DIR, "ar": AR_FONT_DIR, "W": W, "cw": int(W * 0.78), "accent": accent}
+    css += ("body { padding: 0; height: %dpx; align-items: center; } "
+            ".cap { max-width: %dpx; text-align: center; font-weight: 800; font-size: %dpx; line-height: 1.25; color: #fff; "
+            "-webkit-text-stroke: %.1fpx #000; paint-order: stroke fill; text-shadow: 0 6px 16px rgba(0,0,0,.55); } "
+            ".cap .hl { color: %s; }" % (CAP_BOX, int(W * 0.86), size, outline * 2, accent))
+    def page(inner):
+        return ('<html><head><meta charset="utf-8"><style>%s</style></head><body class="%s"><div id="c" class="cap">%s</div>'
+                '</body></html>' % (css, "rtl" if rtl else "", inner))
+    events = [(max(0.0, s), min(e, dur), parts) for s, e, parts in caption_events(words, int(cfg.get("max_words", 3)))]
+    items = [{"html": page(""), "out": os.path.join(tmp, "cap_blank.png"), "box": CAP_BOX}]
+    for i, (s, e, parts) in enumerate(events):
+        inner = " ".join('<span class="hl">%s</span>' % esc(w) if hl else esc(w) for w, hl in parts)
+        items.append({"html": page(inner), "out": os.path.join(tmp, "cap%03d.png" % i), "box": CAP_BOX})
+    jobfile = os.path.join(tmp, "caps.json")
+    with open(jobfile, "w") as f:
+        json.dump({"width": W, "items": items}, f, ensure_ascii=False)
+    script = os.path.join(tmp, "render_cards.js")
+    with open(script, "w") as f:
+        f.write(NODE_RENDER)
+    run(["node", script, jobfile])
+    blank = items[0]["out"]
+    seq, t = [], 0.0
+    for (s, e, _), it in zip(events, items[1:]):
+        if s > t + 0.001:
+            seq.append((blank, s - t))
+        if e > s:
+            seq.append((it["out"], e - max(s, t)))
+            t = e
+    if dur > t:
+        seq.append((blank, dur - t))
+    lst = os.path.join(tmp, "caps.txt")
+    with open(lst, "w") as f:
+        f.write("ffconcat version 1.0\n")
+        for path, d in seq:
+            f.write("file '%s'\nduration %.3f\n" % (path, max(d, 0.001)))
+        f.write("file '%s'\n" % seq[-1][0])
+    return lst
+
+
+def build_captions(words, W, H, cfg, path, rtl=False):
+    size = int(cfg.get("size", 74))
+    y = float(cfg.get("y", 0.70))
+    accent = ass_color(cfg.get("accent", "#FFFFFF"))
+    maxw = int(cfg.get("max_words", 3))
+    font = cfg.get("font", "Montserrat")
+    outline = float(cfg.get("outline", 3))
+    bold = -1 if font == "Montserrat" else 0
+    encoding = -1 if rtl else 1  # -1 = libass detects right-to-left paragraphs (Arabic word order)
+    lines = []
+    for s, end, parts in caption_events(words, maxw):
+        txt = [("{\\c%s}%s{\\c&H00FFFFFF}" % (accent, ass_esc(w)) if hl else ass_esc(w)) for w, hl in parts]
+        lines.append("Dialogue: 0,%s,%s,Cap,,0,0,0,,{\\an5\\pos(%d,%d)}%s"
+                     % (ass_time(s), ass_time(end), W // 2, int(H * y), " ".join(txt)))
     header = """[Script Info]
 ScriptType: v4.00+
 PlayResX: %d
@@ -239,11 +312,11 @@ WrapStyle: 0
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Cap,Montserrat,%d,&H00FFFFFF,&H00FFFFFF,&H00000000,&H64000000,-1,0,0,0,100,100,0,0,1,3,3,5,60,60,0,1
+Style: Cap,%s,%d,&H00FFFFFF,&H00FFFFFF,&H00000000,&H64000000,%d,0,0,0,100,100,0,0,1,%.1f,3,5,60,60,0,%d
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
-""" % (W, H, size)
+""" % (W, H, font, size, bold, outline, encoding)
     with open(path, "w", encoding="utf-8") as f:
         f.write(header + "\n".join(lines) + "\n")
 
@@ -295,7 +368,7 @@ def build_final(plan, base, W, H, fps, tmp):
     # cards
     cards = plan.get("cards") or []
     accent = (plan.get("captions") or {}).get("card_accent", "#F5C451")
-    pngs = render_cards(cards, W, accent, tmp)
+    pngs = render_cards(cards, W, accent, tmp, bool(plan.get("rtl")))
     for png in pngs:
         inputs += ["-loop", "1", "-t", "%.3f" % dur, "-i", png]
     idxs = list(range(inputs.count("-i")))  # input 0 is the base video, then one per card
@@ -314,9 +387,26 @@ def build_final(plan, base, W, H, fps, tmp):
     if words_path:
         with open(words_path, encoding="utf-8") as f:
             words = json.load(f)
+        ccfg = plan.get("captions") or {}
+        engine = ccfg.get("engine", "browser" if plan.get("rtl") else "ass")
+    if words_path and engine == "browser":
+        lst = render_caption_track(words, W, ccfg, bool(plan.get("rtl")), dur, tmp)
+        ci = len(idxs)
+        inputs += ["-f", "concat", "-safe", "0", "-i", lst]
+        idxs.append(ci)
+        fc.append("[%d:v]fps=%d,format=rgba[capv]" % (ci, fps))
+        fc.append("[%s][capv]overlay=x=0:y=%d:eof_action=pass[vc]" % (last, int(H * float(ccfg.get("y", 0.7))) - CAP_BOX // 2))
+        last = "vc"
+    elif words_path:
         ass = os.path.join(tmp, "captions.ass")
-        build_captions(words, W, H, plan.get("captions") or {}, ass)
-        fc.append("[%s]subtitles=filename='%s':fontsdir='%s'[vc]" % (last, ass, FONT_DIR))
+        build_captions(words, W, H, plan.get("captions") or {}, ass, bool(plan.get("rtl")))
+        fdir = os.path.join(tmp, "fonts")
+        os.makedirs(fdir, exist_ok=True)
+        for d in (FONT_DIR, AR_FONT_DIR):
+            for fn in os.listdir(d):
+                if fn.lower().endswith((".ttf", ".otf")) and not os.path.exists(os.path.join(fdir, fn)):
+                    os.symlink(os.path.join(d, fn), os.path.join(fdir, fn))
+        fc.append("[%s]subtitles=filename='%s':fontsdir='%s'[vc]" % (last, ass, fdir))
         last = "vc"
     fc.append("[%s]format=yuv420p[vout]" % last)
 
@@ -351,7 +441,9 @@ def build_final(plan, base, W, H, fps, tmp):
     if not mix:
         fc.append("anullsrc=r=48000:cl=stereo,atrim=0:%.3f[aout]" % dur)
     else:
-        fc.append("%samix=inputs=%d:duration=first:normalize=0,alimiter=limit=0.95[aout]" % ("".join(mix), len(mix)))
+        lufs = plan.get("loudness", -14)  # social-media loudness target; null keeps the original level
+        norm = ",loudnorm=I=%s:TP=-1.5:LRA=11,aresample=48000" % lufs if lufs is not None else ""
+        fc.append("%samix=inputs=%d:duration=first:normalize=0%s,alimiter=limit=0.89[aout]" % ("".join(mix), len(mix), norm))
 
     out = plan["output"]
     os.makedirs(os.path.dirname(os.path.abspath(out)), exist_ok=True)

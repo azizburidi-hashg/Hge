@@ -35,4 +35,10 @@ Render: `python .claude/skills/reel-editor/scripts/build_reel.py --plan "shots/<
 `vidiq_watch_shortform_content` with the reel URL (10 vidIQ credits; ask first) and a prompt asking for: cut rhythm, zoom pattern, caption font/position/highlight, every overlay's look and timing, SFX, music, hook, CTA. Write the style card in the same table format as the default. Copy grammar, never content.
 
 ## Card types (build_reel.py)
-`pill` (text) · `card` (title + rows) · `stat` (value + label) · `cta` (keyword + note). Arabic is UNTESTED: Montserrat has no Arabic letters, so cards and captions fall back to whatever system font exists. For Arabic, add an Arabic font to the fonts folder first and check a still.
+`pill` (text) · `card` (title + rows) · `stat` (value + label) · `cta` (keyword + note). **Arabic (tested on the first reel):** set `"rtl": true` in the plan. Cards and captions are then drawn by Chromium in Cairo (`fonts/`, OFL) with correct shaping and right-to-left order; never use the ASS/libass caption path for Arabic (it shows boxes). Mark phrase breaks with a trailing `|` on a word in words.json (hidden on screen), e.g. at the end of each sentence and between two clips.
+
+## Speech to text (Arabic)
+faster-whisper `medium`, `language="ar"`, `word_timestamps=True`. Feed it audio decoded by ffmpeg (16 kHz mono float array): its own PyAV reader fails here. Then fix the spelling by hand (it wrote فلا for فلّة, الياكوت for الياقوت) and pull first-word starts to the `silencedetect` speech start: Whisper's segment edges are loose.
+
+## Other plan keys
+`sharpen` (0.4–0.8 for small phone videos), `loudness` (default -14 LUFS, null = keep), card `"big": true` for large pills.
