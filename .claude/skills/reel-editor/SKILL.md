@@ -40,5 +40,8 @@ Render: `python .claude/skills/reel-editor/scripts/build_reel.py --plan "shots/<
 ## Speech to text (Arabic)
 faster-whisper `medium`, `language="ar"`, `word_timestamps=True`. Feed it audio decoded by ffmpeg (16 kHz mono float array): its own PyAV reader fails here. Then fix the spelling by hand (it wrote فلا for فلّة, الياكوت for الياقوت) and pull first-word starts to the `silencedetect` speech start: Whisper's segment edges are loose.
 
+## Captions
+Default `"style": "clean"` (the reference look; the user found bold outlined gold-highlight captions ugly). Arabic plan: `"card_family": "PlexArabic"`, `"captions": {"style": "clean", "family": "PlexArabic", "weight": 600, "size": 58, "y": 0.755, "max_words": 4}`. Tajawal did not load in Chromium; use PlexArabic or Cairo.
+
 ## Other plan keys
 `sharpen` (0.4–0.8 for small phone videos), `loudness` (default -14 LUFS, null = keep), card `"big": true` for large pills.

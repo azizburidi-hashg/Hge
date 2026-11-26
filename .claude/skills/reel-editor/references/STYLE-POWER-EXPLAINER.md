@@ -9,7 +9,7 @@ We copy the **editing grammar only**, never that creator's face, words, topic, l
 | Format | 9:16, 1080x1920, 30 fps, 30–45 s |
 | Hook | First 2–5 s: one bold claim + one visual card on screen by 0:01 |
 | Cuts | A jump cut or punch-in every **1.5–3 s**. Alternate scale 1.00 ↔ 1.10–1.18, focus on the face (focus_y ≈ 0.38–0.42) |
-| Captions | White sans (Montserrat 800), centered at **y ≈ 70%**, 1–3 words at a time, black outline + soft shadow, the spoken word highlighted |
+| Captions | **Clean, like the reference (measured by vidIQ):** plain white `#FFF`, medium/semibold (600), NO outline, NO highlight colour, very soft shadow only; whole phrase (2–5 words) appears at once with a hard cut, no animation; one line, ≤ 70% of the width; fixed just below the microphone (≈ 61–63% in the reference; 75% for a seated speaker framed lower). Arabic: IBM Plex Sans Arabic 600, 58 px |
 | Top pill | Black capsule at the top, progress text: `Step 1 •○○` → `Step 2 ••○` → `Step 3 •••` → `3 steps •••` |
 | Info cards | Dark translucent "glass" rounded cards, thin light border, gold accent title. Pop in (fade + 40 px slide up) exactly when the matching word is spoken |
 | Sound | Soft pop on every card entrance; light lo-fi/tech music bed under the voice (~12% volume); optional deeper hit on the big reveal |

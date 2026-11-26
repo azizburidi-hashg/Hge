@@ -37,7 +37,8 @@ import wave
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 FONT_DIR = os.path.normpath(os.path.join(HERE, "..", "..", "blender-shots", "fonts"))
-AR_FONT_DIR = os.path.normpath(os.path.join(HERE, "..", "fonts"))  # Cairo (Arabic + Latin), OFL
+AR_FONT_DIR = os.path.normpath(os.path.join(HERE, "..", "fonts"))  # Cairo, IBM Plex Sans Arabic, Tajawal (OFL)
+CARD_FAMILY = "Cairo"  # plan key "card_family" changes it
 
 
 class PlanError(Exception):
@@ -105,8 +106,18 @@ CARD_CSS = """
 @font-face { font-family: Cairo; src: url('file://%(ar)s/Cairo-arabic-800.ttf'); font-weight: 700 900; unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF, U+200C-200F; }
 @font-face { font-family: Cairo; src: url('file://%(ar)s/Cairo-latin-400.ttf'); font-weight: 400; unicode-range: U+0000-00FF, U+2000-206F, U+2190-21FF; }
 @font-face { font-family: Cairo; src: url('file://%(ar)s/Cairo-latin-800.ttf'); font-weight: 700 900; unicode-range: U+0000-00FF, U+2000-206F, U+2190-21FF; }
+@font-face { font-family: PlexArabic; src: url('file://%(ar)s/PlexArabic-arabic-500.ttf'); font-weight: 500; unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF, U+200C-200F; }
+@font-face { font-family: PlexArabic; src: url('file://%(ar)s/PlexArabic-latin-500.ttf'); font-weight: 500; unicode-range: U+0000-00FF, U+2000-206F, U+2190-21FF; }
+@font-face { font-family: PlexArabic; src: url('file://%(ar)s/PlexArabic-arabic-600.ttf'); font-weight: 600; unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF, U+200C-200F; }
+@font-face { font-family: PlexArabic; src: url('file://%(ar)s/PlexArabic-latin-600.ttf'); font-weight: 600; unicode-range: U+0000-00FF, U+2000-206F, U+2190-21FF; }
+@font-face { font-family: PlexArabic; src: url('file://%(ar)s/PlexArabic-arabic-700.ttf'); font-weight: 700; unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF, U+200C-200F; }
+@font-face { font-family: PlexArabic; src: url('file://%(ar)s/PlexArabic-latin-700.ttf'); font-weight: 700; unicode-range: U+0000-00FF, U+2000-206F, U+2190-21FF; }
+@font-face { font-family: Tajawal; src: url('file://%(ar)s/Tajawal-arabic-500.ttf'); font-weight: 500; unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF, U+200C-200F; }
+@font-face { font-family: Tajawal; src: url('file://%(ar)s/Tajawal-latin-500.ttf'); font-weight: 500; unicode-range: U+0000-00FF, U+2000-206F, U+2190-21FF; }
+@font-face { font-family: Tajawal; src: url('file://%(ar)s/Tajawal-arabic-700.ttf'); font-weight: 700; unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF, U+200C-200F; }
+@font-face { font-family: Tajawal; src: url('file://%(ar)s/Tajawal-latin-700.ttf'); font-weight: 700; unicode-range: U+0000-00FF, U+2000-206F, U+2190-21FF; }
 html, body { margin: 0; background: transparent; }
-body.rtl { direction: rtl; font-family: Cairo, Mont, sans-serif; }
+body.rtl { direction: rtl; font-family: %(cf)s, Cairo, Mont, sans-serif; }
 body.rtl .card .row, body.rtl .stat .label { font-weight: 600; }
 body { width: %(W)dpx; display: flex; justify-content: center; padding: 30px 0; font-family: Mont, sans-serif; }
 .pill { background: rgba(0,0,0,.88); color: #fff; font-weight: 800; font-size: 48px; padding: 20px 48px;
@@ -176,7 +187,7 @@ def card_html(card, W, accent, rtl=False):
         inner = '<div class="card">%s%s</div>' % (title, rows)
     else:
         raise PlanError("unknown card type: %s" % t)
-    css = CARD_CSS % {"fonts": FONT_DIR, "ar": AR_FONT_DIR, "W": W, "cw": int(W * 0.78), "accent": accent}
+    css = CARD_CSS % {"fonts": FONT_DIR, "ar": AR_FONT_DIR, "W": W, "cw": int(W * 0.78), "accent": accent, "cf": CARD_FAMILY}
     return '<html><head><meta charset="utf-8"><style>%s</style></head><body class="%s"><div id="c">%s</div></body></html>' % (
         css, "rtl" if rtl else "", inner)
 
@@ -219,7 +230,7 @@ def ass_esc(s):
     return s.replace("\\", "").replace("{", "(").replace("}", ")")
 
 
-def caption_events(words, maxw):
+def caption_events(words, maxw, per_word=True):
     """Short phrases (<= maxw words, split at punctuation and pauses); one event per spoken word,
     returned as (start, end, [(word, is_current_word), ...])."""
     groups, cur = [], []
@@ -236,6 +247,9 @@ def caption_events(words, maxw):
     events = []
     for g in groups:
         g_end = g[-1][2] + 0.08
+        if not per_word:  # whole phrase at once, plain (hard cut on the next phrase)
+            events.append((g[0][1], g_end, [(w2, False) for w2, _, _ in g]))
+            continue
         for k, (w, s, e) in enumerate(g):
             end = g[k + 1][1] if k + 1 < len(g) else g_end
             events.append((s, end, [(w2, j == k) for j, (w2, _, _) in enumerate(g)]))
@@ -248,18 +262,24 @@ CAP_BOX = 320  # height of a caption frame in pixels
 def render_caption_track(words, W, cfg, rtl, dur, tmp):
     """Captions drawn by Chromium (correct Arabic shaping, same fonts as the cards).
     Returns a concat-demuxer list that plays the caption frames at the right times."""
-    size = int(cfg.get("size", 80))
-    outline = float(cfg.get("outline", 4))
+    clean = cfg.get("style", "clean") == "clean"   # clean = the reference reel: plain white, soft shadow, phrase at once
+    size = int(cfg.get("size", 52 if clean else 80))
+    outline = float(cfg.get("outline", 0 if clean else 4))
     accent = cfg.get("accent", "#FFFFFF")
-    css = CARD_CSS % {"fonts": FONT_DIR, "ar": AR_FONT_DIR, "W": W, "cw": int(W * 0.78), "accent": accent}
+    family = cfg.get("family", "Cairo")
+    weight = int(cfg.get("weight", 600 if clean else 800))
+    shadow = cfg.get("shadow", "0 2px 3px rgba(0,0,0,.35), 0 3px 14px rgba(0,0,0,.45)" if clean
+                     else "0 6px 16px rgba(0,0,0,.55)")
+    css = CARD_CSS % {"fonts": FONT_DIR, "ar": AR_FONT_DIR, "W": W, "cw": int(W * 0.78), "accent": accent, "cf": CARD_FAMILY}
     css += ("body { padding: 0; height: %dpx; align-items: center; } "
-            ".cap { max-width: %dpx; text-align: center; font-weight: 800; font-size: %dpx; line-height: 1.25; color: #fff; "
-            "-webkit-text-stroke: %.1fpx #000; paint-order: stroke fill; text-shadow: 0 6px 16px rgba(0,0,0,.55); } "
-            ".cap .hl { color: %s; }" % (CAP_BOX, int(W * 0.86), size, outline * 2, accent))
+            ".cap { max-width: %dpx; text-align: center; font-family: %s, Cairo, Mont, sans-serif; font-weight: %d; "
+            "font-size: %dpx; line-height: 1.3; color: #fff; white-space: nowrap; letter-spacing: -0.2px; "
+            "-webkit-text-stroke: %.1fpx #000; paint-order: stroke fill; text-shadow: %s; } "
+            ".cap .hl { color: %s; }" % (CAP_BOX, int(W * 0.86), family, weight, size, outline * 2, shadow, accent))
     def page(inner):
         return ('<html><head><meta charset="utf-8"><style>%s</style></head><body class="%s"><div id="c" class="cap">%s</div>'
                 '</body></html>' % (css, "rtl" if rtl else "", inner))
-    events = [(max(0.0, s), min(e, dur), parts) for s, e, parts in caption_events(words, int(cfg.get("max_words", 3)))]
+    events = [(max(0.0, s), min(e, dur), parts) for s, e, parts in caption_events(words, int(cfg.get("max_words", 3)), not clean)]
     items = [{"html": page(""), "out": os.path.join(tmp, "cap_blank.png"), "box": CAP_BOX}]
     for i, (s, e, parts) in enumerate(events):
         inner = " ".join('<span class="hl">%s</span>' % esc(w) if hl else esc(w) for w, hl in parts)
@@ -469,6 +489,8 @@ def main():
             plan = json.load(f)
         W, H = [int(x) for x in str(plan.get("size", "1080x1920")).lower().split("x")]
         fps = int(plan.get("fps", 30))
+        global CARD_FAMILY
+        CARD_FAMILY = plan.get("card_family", "Cairo")
         if "output" not in plan:
             raise PlanError("plan needs an output path")
         base = build_base(plan, W, H, fps, tmp)
