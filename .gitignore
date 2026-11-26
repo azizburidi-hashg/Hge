@@ -1,3 +1,11 @@
 __pycache__/
 renders/
 .kit/
+
+# Personal footage, stills and finished clips stay local (this repo is public)
+shots/**/*.mp4
+shots/**/*.mov
+shots/**/*.png
+shots/**/*.jpg
+shots/**/*.wav
+shots/**/*.mp3
