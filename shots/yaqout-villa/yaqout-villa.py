@@ -110,7 +110,7 @@ for gx in range(-8, 9):
         x, y = gx * 4.4 + 2.2, gy * 4.4
         if SITE[0] - 1 < x < SITE[1] + 1 and SITE[2] - 1 < y < SITE[3] + 1:
             continue
-        if random.random() < 0.22:
+        if random.random() < 0.34:
             continue
         w, d, h = random.uniform(2.2, 3.4), random.uniform(2.2, 3.4), random.choice((0.8, 1.2, 1.6, 2.4, 3.2))
         root = kit.empty((x, y, 0.0), f"B{gx}_{gy}")
@@ -296,7 +296,7 @@ for i, x in enumerate((-5.2, -1.6, 0.6, 2.4, 4.2, 6.0, 9.8)):
 # ---------------------------------------------------------------- light: one warm sun, a cool fill from the sky colour
 sun = kit.light("SUN", (-14, -22, 30), (2, 0, 0), power=3.2, color="#FFE9CF", name="Sun")
 sun.data.angle = math.radians(1)
-fill = kit.light("AREA", (24, -10, 18), (2, 0, 0), power=9000, color="#A9C3FF", size=3.0, name="Fill")
+fill = kit.light("SUN", (24, -10, 18), (2, 0, 0), power=0.9, color="#A9C3FF", name="Fill")   # cheaper than an area light
 fill.data.use_shadow = False
 for lt in bpy.data.lights:
     if hasattr(lt, "use_shadow_jitter"):
