@@ -28,7 +28,7 @@ Angle: the rare part is that it's a whole block. Bulk land for عمائر in Nor
 2. **Size and plots:** Block 32 is about 14,012.13 m² (plots 212 to 229, which is 18 plot numbers). Block 35 is about 7,800 m² (plots 250 to 261, which is 12 plot numbers) (listing).
 3. **Streets:** four streets 20 m wide on each block (listing).
 4. **Zoning:** in the عمائر area of North Obhur and "مناسبة للتطوير العقاري" (listing).
-5. **Price comparison:** 3,300 is below the published asking prices for single residential plots in the area, which ran 3,365 to 4,406 SAR/m² in 2026 ads (research, low-medium confidence). The Bayut links must be opened and checked before this goes in any post.
+5. **Price comparison:** 3,300 is below the published asking prices for single residential plots in the area, which ran 3,365 to 4,406 SAR/m² in recent ads (some undated) (research, low-medium confidence). The Bayut links must be opened and checked before this goes in any post.
 - Optional context: North Obhur is home to Jeddah Tower and Jeddah Economic City. Don't give a distance or an opening date.
 
 ## 5. Offer and call to action

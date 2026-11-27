@@ -11,7 +11,7 @@ If anything changes, change it here and in `config.ts`. Agents must not invent f
 - **Commercial registration (السجل التجاري):** 7052161564
 
 ## Contact (exactly as written, never changed)
-- WhatsApp: +966 55 528 2922 (wa.me/966555282922)
+- WhatsApp: +966 55 528 2922 (wa.me/966555282922). The local form 0555282922 (or 055 528 2922) is the same number and is fine in Saudi-facing posts.
 - Phones: +966555282922, +966559955075
 - Email: Sematalsakan@hotmail.com
 - Website: https://samat-alsakan.com

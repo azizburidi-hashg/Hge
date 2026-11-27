@@ -28,7 +28,7 @@ The two "photos" are **designed flyers, not site photos**. Each one has three pa
 | 3,300 ريال للمتر المربع (both blocks) | listing |
 | أربعة شوارع، عرض كل منها 20 م (both blocks) | listing |
 | منطقة عمائر، أبحر الشمالية، الجزء الشمالي الغربي من جدة | listing |
-| أرض للبيع، مناسبة للتطوير العقاري | listing |
+| أرض للبيع في منطقة عمائر | listing |
 | North Obhur is home to Jeddah Tower and Jeddah Economic City (no distance, no date) | research, strategy (optional context) |
 | FAL 1100304235, WhatsApp +966 55 528 2922 | BRAND.md |
 
@@ -93,7 +93,7 @@ Voiceover: about 50 words over 28 s, which fits at a calm pace.
 |---|---|---|---|---|
 | 1 HOOK | 0.0-2.0 | **[owner footage]** Drone or high phone shot over North Obhur, filmed by the owner (real, current, legal to fly or filmed from a building). Fallback if there's no footage: the 3D map push-in (3D-5) starts here. | **وين يقع البلوك؟** | «وين يقع البلوك؟» |
 | 2 | 2.0-7.0 | **[owner footage: map pin]** A screen recording of Google Maps (or a screenshot pushed in through Blender, 3D-5): start on Jeddah, zoom to North Obhur, end on the **owner's exact pin** for the blocks. Keep the map provider's attribution visible. No route line or distance unless the owner measures it and approves. | **أبحر الشمالية** / شمال غرب جدة | «في أبحر الشمالية، الجزء الشمالي الغربي من جدة،» |
-| 3 | 7.0-11.0 | **[owner footage: site visit]** A slow drive or walk along one of the 20 m streets beside the block, phone held steady and horizontal-to-vertical cropped, filmed on site. | **منطقة عمائر** / مناسبة للتطوير العقاري | «داخل منطقة عمائر، والأرض مناسبة للتطوير العقاري.» |
+| 3 | 7.0-11.0 | **[owner footage: site visit]** A slow drive or walk along one of the 20 m streets beside the block, phone held steady and horizontal-to-vertical cropped, filmed on site. | **منطقة عمائر** | «داخل منطقة عمائر في أبحر الشمالية.» |
 | 4 | 11.0-15.0 | **[owner footage: site visit]** A 360-degree turn at a block corner, or a drone top-down over the block showing the streets on all four sides. Fallback: the 3D streets diagram (3D-4), labeled «رسم توضيحي». | **4 شوارع** / عرض كل شارع 20 م | «كل بلوك تحيط فيه أربعة شوارع عرض 20 متر.» |
 | 5 | 15.0-18.0 | **[owner footage]** Optional. Jeddah Tower filmed by the owner from a public place (no news or stock clips). If there's none, cut this shot and stretch shots 3 and 4. | أبحر الشمالية: **برج جدة** / ومدينة جدة الاقتصادية | «وأبحر الشمالية هي موقع برج جدة ومدينة جدة الاقتصادية.» (no distance, no date, no "قريب") |
 | 6 END | 18.0-22.0 | End card (3D-6 or a flat editor card). Optional 1 s flash of `samat-fal-card` (3D-7) before it. | **3,300 ريال / م²** / واتساب +966 55 528 2922 / رخصة فال 1100304235 / ترخيص الإعلان: بلوك 32 [رقم ترخيص الإعلان] · بلوك 35 [رقم ترخيص الإعلان] | «السعر 3,300 ريال للمتر. راسلنا واتساب.» |
