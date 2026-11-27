@@ -519,3 +519,90 @@ These are optional replacements for the current page text. They use the same fac
 رخصة فال: 1100304235 · رقم ترخيص الإعلان: [رقم ترخيص الإعلان]
 للاستفسار راسلنا عبر واتساب على +966 55 528 2922، مع ذكر (بلوك 35)
 ```
+
+---
+
+## 12. Pieces added for the calendar (`calendar.md`)
+
+### Reels
+**Instagram Reels reuse TT-1, TT-2 and TT-3 word for word. There are no separate REEL captions.** The TT captions have no clickable links: the CTA is a phone number, and links don't work in Instagram captions anyway. The hashtags suit both platforms. Video 2 Reels use `VID2-CAP` below.
+
+### TRUST-1 (a company trust piece, not a property ad)
+For IG stories (C28, C60), Snapchat (C59) and X. It names no property, so it carries no ad license number. If the owner adds a block to it, it becomes a property ad and needs `[رقم ترخيص الإعلان]` and the block. Past deals are mentioned only if the owner names and confirms them. As written, it claims none.
+
+**TRUST-1 / Story** (IG and Snapchat, over 3D-7 `samat-fal-card` or a flat navy card with the logo)
+```
+سمات السكن للاستثمار العقاري · جدة
+رخصة فال: 1100304235
+السجل التجاري: 7052161564
+نقدم العقار بصورة تليق بقيمته
+راسلنا واتساب على +966 55 528 2922
+```
+(For Snapchat, the CTA line can read "واتساب 0555282922", the same as SNAP-1 to SNAP-3.)
+
+**TRUST-1 / X** ≈ 190 chars
+```
+سمات السكن للاستثمار العقاري، جدة.
+رخصة فال: 1100304235
+السجل التجاري: 7052161564
+نقدم العقار بصورة تليق بقيمته، ونصنع لكل فرصة حضوراً يلفت الانتباه ويقود إلى القرار الصحيح.
+واتساب: wa.me/966555282922
+```
+Optional line, only if the owner confirms it and gives the link: "تقدر تتحقق من رخصة فال عبر الهيئة العامة للعقار: [رابط التحقق]". It isn't added by default because I haven't checked that link.
+
+### VID2-CAP (the calendar's "VIDEO-2 caption": Video 2 المنطقة, TikTok and IG Reels, C54 and C55)
+It opens with HOOK-5. It gives no distances, no dates and no "قريب" claims.
+```
+وين يقع البلوك؟
+في أبحر الشمالية، شمال غرب جدة، داخل منطقة عمائر.
+بلوك 32 (نحو 14,012.13 م²) وبلوك 35 (نحو 7,800 م²): كل بلوك كامل تحيط به أربعة شوارع عرض كل منها 20 م، بسعر 3,300 ريال للمتر.
+أبحر الشمالية هي موقع برج جدة ومدينة جدة الاقتصادية.
+رخصة فال: 1100304235 · ترخيص الإعلان: بلوك 32 [رقم ترخيص الإعلان] · بلوك 35 [رقم ترخيص الإعلان]
+راسلنا واتساب على +966 55 528 2922 واذكر (بلوك 32) أو (بلوك 35)
+#جدة #أبحر_الشمالية #أراضي_للبيع #عمائر #سمات_السكن
+```
+Keep the Jeddah Tower line only if Video 2 includes shot 5 (the owner's own tower footage). If shot 5 is cut, delete the line. Either way, it names the district only, not the blocks' position relative to the tower.
+
+### X-4 (area post, C61, Video 2 attached; fallback Video 3) ≈ 255 chars
+```
+منطقة عمائر أبحر الشمالية، شمال غرب جدة
+بلوك 32 وبلوك 35 كاملين، كل بلوك بأربعة شوارع عرض 20 م
+3,300 ريال للمتر
+رخصة فال: 1100304235
+ترخيص الإعلان: بلوك 32 [رقم ترخيص الإعلان] · بلوك 35 [رقم ترخيص الإعلان]
+واتساب: wa.me/966555282922 واذكر رقم البلوك
+```
+
+### X video variants (C33, C42, C52)
+Each variant is reworded so X doesn't treat it as a repeat of the original. They use the same facts. None of them contains the comparison line.
+
+**X-1V** (Block 32, with Video 1 Block 32 cut; replaces X-1 at C33) ≈ 262 chars
+```
+بالفيديو: بلوك 32 في منطقة عمائر أبحر الشمالية
+بلوك كامل، نحو 14,012.13 م² (القطع 212 إلى 229)
+تحيط به أربعة شوارع، عرض كل شارع 20 م
+السعر 3,300 ريال للمتر
+رخصة فال: 1100304235 | ترخيص الإعلان: [رقم ترخيص الإعلان]
+واتساب: wa.me/966555282922 واذكر (بلوك 32)
+```
+
+**X-2V** (Block 35, with Video 1 Block 35 cut; replaces X-2 at C42) ≈ 262 chars
+```
+بالفيديو: بلوك 35 في منطقة عمائر أبحر الشمالية
+بلوك كامل، نحو 7,800 م² (القطع 250 إلى 261)
+شارع 20 م من كل جهة: شمال، غرب، شرق، جنوب
+السعر 3,300 ريال للمتر
+رخصة فال: 1100304235 | ترخيص الإعلان: [رقم ترخيص الإعلان]
+واتساب: wa.me/966555282922 واذكر (بلوك 35)
+```
+
+**X-3V** (Investor variant, Block 35, with Video 3; replaces X-3 at C52) ≈ 253 chars
+```
+للمستثمر والمطوّر في جدة، بالأرقام:
+بلوك 35 كامل، نحو 7,800 م²، منطقة عمائر أبحر الشمالية
+أربعة شوارع عرض كل منها 20 م
+3,300 ريال للمتر للبلوك كامل
+رخصة فال: 1100304235 | ترخيص الإعلان: [رقم ترخيص الإعلان]
+واتساب: wa.me/966555282922 واذكر (بلوك 35)
+```
+X-3V leaves out the "أقل من أسعار العرض المنشورة" line on purpose, so it still appears in only 2 pieces (X-3 and WA-INV-1).
