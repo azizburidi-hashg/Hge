@@ -27,7 +27,7 @@ SAND, LOT, ASPHALT = "#D9C59C", "#CDBB97", "#2B313B"
 WHITE, WOOD, GLASS = "#F3EFE7", "#8A5A3A", "#24384F"
 ACCENT, GREEN, WATER, CLAY = "#E0A040", "#3E9E4F", "#38B2EE", "#B5562F"
 
-kit.setup(world="#1A2230", look="Medium High Contrast", motion_blur=0.25)
+kit.setup(world="#1A2230", look="Medium High Contrast", motion_blur=0)   # no blur: halves render time on this slow PC
 random.seed(4)
 
 
@@ -105,8 +105,8 @@ box("Lot", (16.5, 8.2, 0.06), (2.2, 0.0, 0.03), kit.matte(LOT, 0.9, "LotMat"))
 SITE = (-6.5, 11.0, -4.8, 4.8)                       # x0, x1, y0, y1 kept clear of city blocks
 block_mats = [kit.matte(c, 0.7, f"Block{i}") for i, c in enumerate(("#C9CDD3", "#B9C0C9", "#D8D3C8", "#AEB6C1"))]
 blocks = []
-for gx in range(-9, 10):
-    for gy in range(-7, 8):
+for gx in range(-8, 9):
+    for gy in range(-6, 7):
         x, y = gx * 4.4 + 2.2, gy * 4.4
         if SITE[0] - 1 < x < SITE[1] + 1 and SITE[2] - 1 < y < SITE[3] + 1:
             continue
