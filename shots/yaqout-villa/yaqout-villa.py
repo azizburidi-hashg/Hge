@@ -27,7 +27,7 @@ SAND, LOT, ASPHALT = "#D9C59C", "#CDBB97", "#2B313B"
 WHITE, WOOD, GLASS = "#F3EFE7", "#8A5A3A", "#24384F"
 ACCENT, GREEN, WATER, CLAY = "#E0A040", "#3E9E4F", "#38B2EE", "#B5562F"
 
-kit.setup(world="#1A2230", look="Medium High Contrast", motion_blur=0)   # no blur: halves render time on this slow PC
+kit.setup(world="#1A2230", look="Medium High Contrast", motion_blur=0, bloom=0)   # no blur: halves render time on this slow PC
 random.seed(4)
 
 
@@ -322,4 +322,4 @@ kit.key(cam, "location", [(F(t), tuple(p[i] + off[i] for i in range(3)), e) for 
 kit.key(kit.aim(cam), "location", [(F(t), p, e) for t, p, _, e in shots])
 kit.key(cam.data, "ortho_scale", [(F(t), o, e) for t, _, o, e in shots])
 
-kit.post(bloom=0.25, vignette=0.3, grain=0.02)
+kit.post(bloom=0, vignette=0.3, grain=0)   # light finish: keeps the render under the time limit
